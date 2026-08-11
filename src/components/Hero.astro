@@ -1,50 +1,53 @@
 ---
-import { Icon } from 'astro-icon/components';
-import { profile } from '../data/profile';
+import { Icon } from "astro-icon/components";
+import { profile } from "../data/profile";
 ---
 
-<section id="top" class="mx-auto max-w-6xl px-5 pt-16 pb-20 sm:px-8 sm:pt-24 sm:pb-28">
-  <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-14">
-    <div class="lg:col-span-7">
-      <h1 class="display text-4xl text-ink sm:text-5xl xl:text-[3.25rem]">
-        {profile.headline}
-      </h1>
+<section
+	id="top"
+	class="mx-auto max-w-6xl px-5 pt-16 pb-20 sm:px-8 sm:pt-24 sm:pb-28"
+>
+	<div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-14">
+		<div class="lg:col-span-7">
+			<h1 class="display text-4xl text-ink sm:text-5xl xl:text-[3.25rem]">
+				{profile.headline}
+			</h1>
 
-      <p class="mt-6 max-w-[54ch] text-base text-ink-soft sm:text-lg">
-        {profile.intro}
-      </p>
+			<p class="mt-6 max-w-[54ch] text-base text-ink-soft sm:text-lg">
+				{profile.intro}
+			</p>
 
-      <div class="mt-9 flex flex-wrap items-center gap-3">
-        <a
-          href="#projects"
-          class="inline-flex items-center gap-2 rounded-[6px] bg-ink px-5 py-3 text-sm font-medium text-canvas transition-transform duration-200 hover:opacity-90 active:scale-[0.98]"
-        >
-          See projects
-          <Icon name="ph:arrow-down-right-bold" class="size-4" />
-        </a>
-        <a
-          href={`mailto:${profile.email}`}
-          class="inline-flex items-center gap-2 rounded-[6px] border border-line bg-surface px-5 py-3 text-sm font-medium text-ink transition-colors duration-200 hover:border-accent hover:text-accent active:scale-[0.98]"
-        >
-          Email me
-        </a>
-      </div>
-    </div>
+			<div class="mt-9 flex flex-wrap items-center gap-3">
+				<a
+					href="#projects"
+					class="inline-flex items-center gap-2 rounded-[6px] bg-ink px-5 py-3 text-sm font-medium text-canvas transition-transform duration-200 hover:opacity-90 active:scale-[0.98]"
+				>
+					See projects
+					<Icon name="ph:arrow-down-right-bold" class="size-4" />
+				</a>
+				<a
+					href={`mailto:${profile.email}`}
+					class="inline-flex items-center gap-2 rounded-[6px] border border-line bg-surface px-5 py-3 text-sm font-medium text-ink transition-colors duration-200 hover:border-accent hover:text-accent active:scale-[0.98]"
+				>
+					Email me
+				</a>
+			</div>
+		</div>
 
-    <div class="lg:col-span-5">
-      <figure
-        class="overflow-hidden rounded-[12px] border border-line bg-surface-tint"
-      >
-        <img
-          src="https://picsum.photos/seed/scout-workspace-portrait/1000/1200"
-          alt="Placeholder photograph, to be replaced with a portrait of your own"
-          width="1000"
-          height="1200"
-          fetchpriority="high"
-          decoding="async"
-          class="aspect-[4/5] w-full object-cover opacity-95 saturate-[0.75]"
-        />
-      </figure>
-    </div>
-  </div>
+		<div class="lg:col-span-5">
+			<figure
+				class="overflow-hidden rounded-[12px] border border-line bg-surface-tint"
+			>
+				<img
+					src="https://picsum.photos/seed/scout-workspace-portrait/1000/1200"
+					alt="Placeholder photograph, to be replaced with a portrait of your own"
+					width="1000"
+					height="1200"
+					fetchpriority="high"
+					decoding="async"
+					class="aspect-[4/5] w-full object-cover opacity-95 saturate-[0.75]"
+				/>
+			</figure>
+		</div>
+	</div>
 </section>

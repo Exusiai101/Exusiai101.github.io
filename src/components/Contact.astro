@@ -1,48 +1,57 @@
 ---
-import { Icon } from 'astro-icon/components';
-import { links, profile } from '../data/profile';
+import { Icon } from "astro-icon/components";
+import { links, profile } from "../data/profile";
 ---
 
 <section id="contact" class="border-t border-line bg-surface-tint/40">
-  <div class="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
-    <div class="max-w-[46ch]">
-      <h2 class="display reveal text-3xl text-ink sm:text-4xl">Get in touch</h2>
-      <p class="reveal mt-5 text-ink-soft" style="--index:1">
-        {profile.availability} The fastest way to reach me is email, and I answer within
-        a day or two.
-      </p>
-      <a
-        href={`mailto:${profile.email}`}
-        class="reveal mt-8 inline-flex items-center gap-2 rounded-[6px] bg-ink px-5 py-3 text-sm font-medium text-canvas transition-opacity duration-200 hover:opacity-90 active:scale-[0.98]"
-        style="--index:2"
-      >
-        <Icon name="ph:envelope-simple-bold" class="size-4" />
-        Email me
-      </a>
-    </div>
+	<div class="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
+		<div class="max-w-[46ch]">
+			<h2 class="display reveal text-3xl text-ink sm:text-4xl">
+				Get in touch
+			</h2>
+			<p class="reveal mt-5 text-ink-soft" style="--index:1">
+				{profile.availability} The fastest way to reach me is email, and I
+				answer within a day or two.
+			</p>
+			<a
+				href={`mailto:${profile.email}`}
+				class="reveal mt-8 inline-flex items-center gap-2 rounded-[6px] bg-ink px-5 py-3 text-sm font-medium text-canvas transition-opacity duration-200 hover:opacity-90 active:scale-[0.98]"
+				style="--index:2"
+			>
+				<Icon name="ph:envelope-simple-bold" class="size-4" />
+				Email me
+			</a>
+		</div>
 
-    <ul class="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2">
-      {
-        links.map((link, index) => (
-          <li style={`--index:${index}`} class="reveal">
-            <a
-              href={link.href}
-              rel="me noopener"
-              class="group flex items-center gap-4 rounded-[12px] border border-line bg-surface p-5 transition-colors duration-200 hover:border-accent"
-            >
-              <Icon name={link.icon} class="size-5 shrink-0 text-accent" />
-              <span class="min-w-0">
-                <span class="block text-sm font-medium text-ink">{link.label}</span>
-                <span class="block truncate text-sm text-muted">{link.handle}</span>
-              </span>
-              <Icon
-                name="ph:arrow-up-right-bold"
-                class="ml-auto size-4 shrink-0 text-muted transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              />
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-  </div>
+		<ul class="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2">
+			{
+				links.map((link, index) => (
+					<li style={`--index:${index}`} class="reveal">
+						<a
+							href={link.href}
+							rel="me noopener"
+							class="group flex items-center gap-4 rounded-[12px] border border-line bg-surface p-5 transition-colors duration-200 hover:border-accent"
+						>
+							<Icon
+								name={link.icon}
+								class="size-5 shrink-0 text-accent"
+							/>
+							<span class="min-w-0">
+								<span class="block text-sm font-medium text-ink">
+									{link.label}
+								</span>
+								<span class="block truncate text-sm text-muted">
+									{link.handle}
+								</span>
+							</span>
+							<Icon
+								name="ph:arrow-up-right-bold"
+								class="ml-auto size-4 shrink-0 text-muted transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+							/>
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</div>
 </section>

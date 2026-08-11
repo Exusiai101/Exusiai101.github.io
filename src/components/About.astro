@@ -1,41 +1,46 @@
 ---
-import { profile, toolkit } from '../data/profile';
+import { profile, toolkit } from "../data/profile";
 ---
 
 <section id="about" class="border-t border-line bg-surface-tint/40">
-  <div class="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
-    <div class="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
-      <div class="lg:col-span-7">
-        <h2 class="display reveal text-3xl text-ink sm:text-4xl">About</h2>
-        <div class="mt-6 space-y-5">
-          {
-            profile.about.map((paragraph, index) => (
-              <p style={`--index:${index + 1}`} class="reveal max-w-[62ch] text-ink-soft">
-                {paragraph}
-              </p>
-            ))
-          }
-        </div>
-      </div>
+	<div class="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
+		<div class="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+			<div class="lg:col-span-7">
+				<h2 class="display reveal text-3xl text-ink sm:text-4xl">
+					About
+				</h2>
+				<div class="mt-6 space-y-5">
+					{
+						profile.about.map((paragraph, index) => (
+							<p
+								style={`--index:${index + 1}`}
+								class="reveal max-w-[62ch] text-ink-soft"
+							>
+								{paragraph}
+							</p>
+						))
+					}
+				</div>
+			</div>
 
-      <div class="lg:col-span-5">
-        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-1">
-          {
-            toolkit.map((cluster, index) => (
-              <div style={`--index:${index + 1}`} class="reveal">
-                <h3 class="meta">{cluster.group}</h3>
-                <ul class="mt-3 flex flex-wrap gap-2">
-                  {cluster.items.map((item) => (
-                    <li class="rounded-full bg-surface px-3 py-1 text-sm text-ink-soft ring-1 ring-line">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          }
-        </div>
-      </div>
-    </div>
-  </div>
+			<div class="lg:col-span-5">
+				<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-1">
+					{
+						toolkit.map((cluster, index) => (
+							<div style={`--index:${index + 1}`} class="reveal">
+								<h3 class="meta">{cluster.group}</h3>
+								<ul class="mt-3 flex flex-wrap gap-2">
+									{cluster.items.map((item) => (
+										<li class="rounded-full bg-surface px-3 py-1 text-sm text-ink-soft ring-1 ring-line">
+											{item}
+										</li>
+									))}
+								</ul>
+							</div>
+						))
+					}
+				</div>
+			</div>
+		</div>
+	</div>
 </section>

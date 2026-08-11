@@ -1,37 +1,42 @@
 ---
-import { experience, profile } from '../data/profile';
+import { experience, profile } from "../data/profile";
 ---
 
 <section class="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
-  <div class="flex flex-wrap items-baseline justify-between gap-4">
-    <h2 class="display reveal text-3xl text-ink sm:text-4xl">Where I have worked</h2>
-    <a
-      href={profile.resumeUrl}
-      class="text-sm font-medium text-accent transition-opacity duration-200 hover:opacity-75"
-    >
-      Full CV
-    </a>
-  </div>
+	<div class="flex flex-wrap items-baseline justify-between gap-4">
+		<h2 class="display reveal text-3xl text-ink sm:text-4xl">
+			Where I have worked
+		</h2>
+		<a
+			href={profile.resumeUrl}
+			class="text-sm font-medium text-accent transition-opacity duration-200 hover:opacity-75"
+		>
+			Full CV
+		</a>
+	</div>
 
-  <div class="mt-10">
-    {
-      experience.map((job, index) => (
-        <article
-          style={`--index:${index}`}
-          class:list={[
-            'reveal grid grid-cols-1 gap-2 py-7 sm:grid-cols-12 sm:gap-8',
-            index > 0 && 'border-t border-line',
-          ]}
-        >
-          <p class="meta sm:col-span-3">{job.period}</p>
-          <div class="sm:col-span-9">
-            <h3 class="text-lg text-ink">
-              {job.role}, <span class="text-muted">{job.org}</span>
-            </h3>
-            <p class="mt-2 max-w-[60ch] text-sm text-ink-soft">{job.note}</p>
-          </div>
-        </article>
-      ))
-    }
-  </div>
+	<div class="mt-10">
+		{
+			experience.map((job, index) => (
+				<article
+					style={`--index:${index}`}
+					class:list={[
+						"reveal grid grid-cols-1 gap-2 py-7 sm:grid-cols-12 sm:gap-8",
+						index > 0 && "border-t border-line",
+					]}
+				>
+					<p class="meta sm:col-span-3">{job.period}</p>
+					<div class="sm:col-span-9">
+						<h3 class="text-lg text-ink">
+							{job.role},{" "}
+							<span class="text-muted">{job.org}</span>
+						</h3>
+						<p class="mt-2 max-w-[60ch] text-sm text-ink-soft">
+							{job.note}
+						</p>
+					</div>
+				</article>
+			))
+		}
+	</div>
 </section>

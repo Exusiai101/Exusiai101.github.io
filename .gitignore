@@ -6,6 +6,9 @@ dist/
 # dependencies
 node_modules/
 
+# raw handbook HTML cache (regenerate with `npm run scrape:handbook`)
+.cache/
+
 # logs
 npm-debug.log*
 yarn-debug.log*

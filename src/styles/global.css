@@ -20,6 +20,18 @@
   --accent-soft: #e1f3fe;
   --accent-on-soft: #1a5b87;
   --shadow: 0 2px 8px rgba(23, 23, 26, 0.04);
+
+  /*
+    Spot pastels for status tags only. Three pairs, no more: compulsory units,
+    optional units, and the incompatibility warning. Availability stays neutral
+    so the graph does not turn into colour soup.
+  */
+  --tag-core-bg: #edf3ec;
+  --tag-core-fg: #346538;
+  --tag-option-bg: #fbf3db;
+  --tag-option-fg: #956400;
+  --tag-warn-bg: #fdebec;
+  --tag-warn-fg: #9f2f2d;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -35,6 +47,13 @@
     --accent-soft: rgba(142, 194, 228, 0.12);
     --accent-on-soft: #a7d2ef;
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+
+    --tag-core-bg: rgba(112, 176, 118, 0.16);
+    --tag-core-fg: #9ed4a3;
+    --tag-option-bg: rgba(214, 168, 74, 0.16);
+    --tag-option-fg: #e0bd76;
+    --tag-warn-bg: rgba(214, 106, 104, 0.16);
+    --tag-warn-fg: #e79b99;
   }
 }
 
@@ -49,6 +68,12 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-accent-on-soft: var(--accent-on-soft);
+  --color-tag-core-bg: var(--tag-core-bg);
+  --color-tag-core-fg: var(--tag-core-fg);
+  --color-tag-option-bg: var(--tag-option-bg);
+  --color-tag-option-fg: var(--tag-option-fg);
+  --color-tag-warn-bg: var(--tag-warn-bg);
+  --color-tag-warn-fg: var(--tag-warn-fg);
 
   --font-sans: 'Geist Variable', 'SF Pro Text', 'Helvetica Neue', sans-serif;
   --font-serif: 'Newsreader Variable', 'Lyon Text', Georgia, serif;
@@ -86,8 +111,22 @@ body {
   color: var(--muted);
 }
 
+/* Status tag: pill, small, uppercase, wide tracking. Pastel pairs only. */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  border-radius: 9999px;
+  padding: 0.15rem 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
 /* Focus visibility is part of the design, not an afterthought. */
-:where(a, button, summary):focus-visible {
+:where(a, button, summary, input, select):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 2px;

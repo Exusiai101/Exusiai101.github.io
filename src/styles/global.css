@@ -1,0 +1,127 @@
+@import 'tailwindcss';
+
+@import '@fontsource-variable/newsreader';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+/*
+  Palette: warm monochrome canvas, one accent (muted ink blue) used across the
+  whole page. Light and dark are the same design, not two designs.
+*/
+:root {
+  --canvas: #fbfbfa;
+  --surface: #ffffff;
+  --surface-tint: #f4f4f2;
+  --line: #eaeaea;
+  --ink: #17171a;
+  --ink-soft: #46464a;
+  --muted: #78787a;
+  --accent: #1f6c9f;
+  --accent-soft: #e1f3fe;
+  --accent-on-soft: #1a5b87;
+  --shadow: 0 2px 8px rgba(23, 23, 26, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #121213;
+    --surface: #191919;
+    --surface-tint: #1f1f20;
+    --line: rgba(255, 255, 255, 0.09);
+    --ink: #ededea;
+    --ink-soft: #c3c3bf;
+    --muted: #8d8d89;
+    --accent: #8ec2e4;
+    --accent-soft: rgba(142, 194, 228, 0.12);
+    --accent-on-soft: #a7d2ef;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+  }
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-tint: var(--surface-tint);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-on-soft: var(--accent-on-soft);
+
+  --font-sans: 'Geist Variable', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  --font-serif: 'Newsreader Variable', 'Lyon Text', Georgia, serif;
+  --font-mono: 'Geist Mono Variable', 'SF Mono', monospace;
+
+  /* Radius system: cards 12px, controls 6px, tags pill. Nothing else. */
+  --radius-card: 12px;
+  --radius-control: 6px;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--canvas);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background-color: var(--canvas);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+.display {
+  font-family: var(--font-serif);
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  font-weight: 400;
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+/* Focus visibility is part of the design, not an afterthought. */
+:where(a, button, summary):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Scroll entry: staggered via --index, driven by IntersectionObserver. */
+.reveal {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 600ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: calc(var(--index, 0) * 80ms);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Ambient warmth behind the hero, fixed so it never repaints on scroll. */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 40rem at 78% -10%, var(--accent-soft), transparent 70%),
+    radial-gradient(50rem 30rem at 5% 5%, rgba(120, 120, 122, 0.05), transparent 70%);
+  opacity: 0.7;
+}

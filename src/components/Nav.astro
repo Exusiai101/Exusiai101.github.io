@@ -1,0 +1,39 @@
+---
+import { profile } from '../data/profile';
+---
+
+<header
+  class="sticky top-0 z-50 h-16 border-b border-line bg-canvas/80 backdrop-blur-md"
+>
+  <nav
+    class="mx-auto flex h-full max-w-6xl items-center justify-between gap-6 px-5 sm:px-8"
+    aria-label="Primary"
+  >
+    <a
+      href="#top"
+      class="font-serif text-lg tracking-[-0.02em] text-ink transition-colors duration-200 hover:text-accent"
+    >
+      {profile.name}
+    </a>
+
+    <ul class="flex items-center gap-5 text-sm sm:gap-7">
+      <li>
+        <a
+          href="#projects"
+          class="text-ink-soft transition-colors duration-200 hover:text-ink">Projects</a
+        >
+      </li>
+      <li>
+        <a href="#about" class="text-ink-soft transition-colors duration-200 hover:text-ink"
+          >About</a
+        >
+      </li>
+      <li>
+        <a
+          href="#contact"
+          class="text-ink-soft transition-colors duration-200 hover:text-ink">Contact</a
+        >
+      </li>
+    </ul>
+  </nav>
+</header>

@@ -1,6 +1,6 @@
 {
   "year": "2026",
-  "scrapedAt": "2026-08-11",
+  "scrapedAt": "2026-08-12",
   "source": "https://www.handbooks.uwa.edu.au",
   "units": [
     {
@@ -4295,10 +4295,7 @@
       "school": "Social Sciences",
       "availability": ["Semester 1"],
       "rules": {
-        "prerequisites": {
-          "html": "12 points of Level 1 study",
-          "units": []
-        },
+        "prerequisites": { "html": "12 points of Level 1 study", "units": [] },
         "advisable": {
           "html": "a background in biological<br><em>or</em> social sciences",
           "units": []
@@ -7872,10 +7869,7 @@
       "school": "Business School",
       "availability": ["Semester 2"],
       "rules": {
-        "prerequisites": {
-          "html": "Completion of 24 points",
-          "units": []
-        },
+        "prerequisites": { "html": "Completion of 24 points", "units": [] },
         "incompatibility": {
           "html": "BUSN1102 Changing the World: Social Innovation, Finance and Enterprise",
           "units": ["BUSN1102"]
@@ -9228,10 +9222,7 @@
           "html": "<em> Enrolment in</em><div class=\"auto\"><a href=\"https://www.handbooks.uwa.edu.au/coursedetails?code=71580\">71580</a> Master of Biotechnology<br><em>or</em> <a href=\"https://www.handbooks.uwa.edu.au/coursedetails?code=BH004\">BH004</a> Bachelor of Science (Honours)</div>",
           "units": []
         },
-        "advisable": {
-          "html": "undergraduate major in Chemistry",
-          "units": []
-        }
+        "advisable": { "html": "undergraduate major in Chemistry", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -10697,10 +10688,7 @@
           "html": "<em> Successful completion of</em><div class=\"auto\"><a data-unit=\"CITQ2002\">CITQ2002</a> Systems Programming</div>",
           "units": ["CITQ2002"]
         },
-        "incompatibility": {
-          "html": "CITQ3002 Computer Networks",
-          "units": []
-        }
+        "incompatibility": { "html": "CITQ3002 Computer Networks", "units": [] }
       },
       "prereqUnits": ["CITQ2002"],
       "coreqUnits": [],
@@ -10739,10 +10727,7 @@
       "school": "Physics, Mathematics and Computing",
       "availability": ["Not available in 2026"],
       "rules": {
-        "prerequisites": {
-          "html": "12 points CITQ units",
-          "units": []
-        },
+        "prerequisites": { "html": "12 points CITQ units", "units": [] },
         "incompatibility": {
           "html": "<a data-unit=\"CITS3006\">CITS3006</a> Penetration Testing",
           "units": ["CITS3006"]
@@ -10763,10 +10748,7 @@
       "school": "Physics, Mathematics and Computing",
       "availability": ["Not available in 2026"],
       "rules": {
-        "prerequisites": {
-          "html": "12 points CITQ units",
-          "units": []
-        },
+        "prerequisites": { "html": "12 points CITQ units", "units": [] },
         "incompatibility": {
           "html": "<a data-unit=\"CITS3007\">CITS3007</a> Secure Coding",
           "units": ["CITS3007"]
@@ -13219,10 +13201,7 @@
       "school": "Humanities",
       "availability": ["Semester 1"],
       "rules": {
-        "prerequisites": {
-          "html": "any Level 1 CLAN unit",
-          "units": []
-        },
+        "prerequisites": { "html": "any Level 1 CLAN unit", "units": [] },
         "incompatibility": {
           "html": "CLAH2202 Age of Thucydides",
           "units": ["CLAH2202"]
@@ -13349,10 +13328,7 @@
       "school": "Humanities",
       "availability": ["Semester 1"],
       "rules": {
-        "prerequisites": {
-          "html": "any Level 2 CLAN unit",
-          "units": []
-        },
+        "prerequisites": { "html": "any Level 2 CLAN unit", "units": [] },
         "incompatibility": {
           "html": "CLAH2201 Emergence of Greece",
           "units": ["CLAH2201"]
@@ -13372,10 +13348,7 @@
       "school": "Humanities",
       "availability": ["Not available in 2026"],
       "rules": {
-        "prerequisites": {
-          "html": "any Level 2 CLAN unit",
-          "units": []
-        },
+        "prerequisites": { "html": "any Level 2 CLAN unit", "units": [] },
         "incompatibility": {
           "html": "CLAH2212 Age of Alexander the Great",
           "units": ["CLAH2212"]
@@ -13395,10 +13368,7 @@
       "school": "Humanities",
       "availability": ["Semester 2"],
       "rules": {
-        "prerequisites": {
-          "html": "any Level 2 CLAN unit",
-          "units": []
-        },
+        "prerequisites": { "html": "any Level 2 CLAN unit", "units": [] },
         "incompatibility": {
           "html": "CLAH2222 The Foundation of the Roman Empire",
           "units": ["CLAH2222"]
@@ -13460,10 +13430,7 @@
       "school": "Humanities",
       "availability": ["Not available in 2026"],
       "rules": {
-        "prerequisites": {
-          "html": "Any level 2 CLAN unit",
-          "units": []
-        }
+        "prerequisites": { "html": "Any level 2 CLAN unit", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -13828,10 +13795,7 @@
       "school": "Social Sciences",
       "availability": ["Semester 1"],
       "rules": {
-        "prerequisites": {
-          "html": "24 credit points at Level 1",
-          "units": []
-        },
+        "prerequisites": { "html": "24 credit points at Level 1", "units": [] },
         "incompatibility": {
           "html": "COMM2203 Digital Media",
           "units": ["COMM2203"]
@@ -18761,10 +18725,7 @@
       "school": "Business School",
       "availability": ["Non-standard teaching period"],
       "rules": {
-        "prerequisites": {
-          "html": "At least 36 points credit.",
-          "units": []
-        },
+        "prerequisites": { "html": "At least 36 points credit.", "units": [] },
         "incompatibility": {
           "html": "<a data-unit=\"ECON5503\">ECON5503</a> Economic Management and Strategy (ID 3006)",
           "units": ["ECON5503"]
@@ -22939,10 +22900,7 @@
       "school": "Humanities",
       "availability": ["Not available in 2026"],
       "rules": {
-        "prerequisites": {
-          "html": "completion of 24 points",
-          "units": []
-        },
+        "prerequisites": { "html": "completion of 24 points", "units": [] },
         "advisable": {
           "html": "Useful, but not essential, to have done a unit in English and Cultural Studies<br><em>or</em> Asian Studies.<br>The key is a willingness to experience cross-cultural situations and to reflect authentically on the process.",
           "units": []
@@ -22962,10 +22920,7 @@
       "school": "Humanities",
       "availability": ["Semester 2"],
       "rules": {
-        "prerequisites": {
-          "html": "any Level 1 English unit",
-          "units": []
-        }
+        "prerequisites": { "html": "any Level 1 English unit", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -23097,10 +23052,7 @@
       "school": "Humanities",
       "availability": ["Semester 2"],
       "rules": {
-        "prerequisites": {
-          "html": "any Level 2 ENGL unit",
-          "units": []
-        }
+        "prerequisites": { "html": "any Level 2 ENGL unit", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -23135,10 +23087,7 @@
       "school": "Humanities",
       "availability": ["Semester 2"],
       "rules": {
-        "prerequisites": {
-          "html": "any Level 2 ENGL unit",
-          "units": []
-        }
+        "prerequisites": { "html": "any Level 2 ENGL unit", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -23173,10 +23122,7 @@
       "school": "Humanities",
       "availability": ["Semester 1"],
       "rules": {
-        "prerequisites": {
-          "html": "any Level 2 ENGL unit",
-          "units": []
-        }
+        "prerequisites": { "html": "any Level 2 ENGL unit", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -23192,10 +23138,7 @@
       "school": "Humanities",
       "availability": ["Semester 1"],
       "rules": {
-        "prerequisites": {
-          "html": "Any Level 2 ENGL unit",
-          "units": []
-        }
+        "prerequisites": { "html": "Any Level 2 ENGL unit", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -23477,9 +23420,7 @@
       "levelOfStudy": "Postgraduate",
       "school": "Office of the Deputy Vice-Chancellor Education",
       "availability": ["Semester 1", "Semester 2"],
-      "rules": {
-        "prerequisites": { "html": "prior approval", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "prior approval", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -23493,9 +23434,7 @@
       "levelOfStudy": "Postgraduate",
       "school": "Office of the Deputy Vice-Chancellor Education",
       "availability": ["Semester 1", "Semester 2"],
-      "rules": {
-        "prerequisites": { "html": "prior approval", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "prior approval", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -23509,9 +23448,7 @@
       "levelOfStudy": "Postgraduate",
       "school": "Office of the Deputy Vice-Chancellor Education",
       "availability": ["Semester 1", "Semester 2"],
-      "rules": {
-        "prerequisites": { "html": "prior approval", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "prior approval", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -23525,9 +23462,7 @@
       "levelOfStudy": "Postgraduate",
       "school": "Office of the Deputy Vice-Chancellor Education",
       "availability": ["Semester 1", "Semester 2"],
-      "rules": {
-        "prerequisites": { "html": "prior approval", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "prior approval", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -25616,10 +25551,7 @@
           "html": "Unit(s) <a data-unit=\"SCIE2204\">SCIE2204</a> Marine Systems<br><em>and</em> Unit(s) <a data-unit=\"BIOL2204\">BIOL2204</a> Marine Biology",
           "units": ["BIOL2204", "SCIE2204"]
         },
-        "advisable": {
-          "html": "A general background in Biology",
-          "units": []
-        }
+        "advisable": { "html": "A general background in Biology", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -26456,10 +26388,7 @@
       "school": "Business School",
       "availability": ["Semester 2"],
       "rules": {
-        "prerequisites": {
-          "html": "Any level 2 Finance unit",
-          "units": []
-        }
+        "prerequisites": { "html": "Any level 2 Finance unit", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -27730,10 +27659,7 @@
       "school": "Humanities",
       "availability": ["Semester 1"],
       "rules": {
-        "prerequisites": {
-          "html": "approval of convener",
-          "units": []
-        },
+        "prerequisites": { "html": "approval of convener", "units": [] },
         "incompatibility": {
           "html": "FREN1105 French Advanced I",
           "units": ["FREN1105"]
@@ -29697,10 +29623,7 @@
       "school": "Social Sciences",
       "availability": ["Semester 1", "Semester 2"],
       "rules": {
-        "prerequisites": {
-          "html": "36 points of prior study",
-          "units": []
-        }
+        "prerequisites": { "html": "36 points of prior study", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -31317,10 +31240,7 @@
       "school": "Humanities",
       "availability": ["Semester 1"],
       "rules": {
-        "prerequisites": {
-          "html": "approval of convener",
-          "units": []
-        },
+        "prerequisites": { "html": "approval of convener", "units": [] },
         "incompatibility": {
           "html": "GRMN1105 German Advanced I",
           "units": ["GRMN1105"]
@@ -32367,10 +32287,7 @@
           "html": "<a data-unit=\"HART1000\">HART1000</a> Great Moments in Art (formerly VISA1000)<br><em>or</em> <a data-unit=\"HART1003\">HART1003</a> Ways of Seeing: Themes and Theories in Art",
           "units": ["HART1000", "HART1003", "VISA1000"]
         },
-        "incompatibility": {
-          "html": "VISA2283 Rome",
-          "units": ["VISA2283"]
-        }
+        "incompatibility": { "html": "VISA2283 Rome", "units": ["VISA2283"] }
       },
       "prereqUnits": ["HART1000", "HART1003", "VISA1000"],
       "coreqUnits": [],
@@ -33154,10 +33071,7 @@
       "school": "Humanities",
       "availability": ["Semester 1"],
       "rules": {
-        "prerequisites": {
-          "html": "12 points of Level 1 units",
-          "units": []
-        },
+        "prerequisites": { "html": "12 points of Level 1 units", "units": [] },
         "incompatibility": {
           "html": "HIST2240 Cowboy Colonialism: the American West.<br>HIST2275 The USA from Civil War to Superpower.<br>HIST2277 The USA since 1945",
           "units": ["HIST2240", "HIST2275", "HIST2277"]
@@ -33241,9 +33155,7 @@
       "levelOfStudy": "Undergraduate",
       "school": "Humanities",
       "availability": ["Semester 1"],
-      "rules": {
-        "advisable": { "html": "24 points of study", "units": [] }
-      },
+      "rules": { "advisable": { "html": "24 points of study", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -33258,10 +33170,7 @@
       "school": "Humanities",
       "availability": ["Semester 1"],
       "rules": {
-        "prerequisites": {
-          "html": "12 points of Level 1 units",
-          "units": []
-        }
+        "prerequisites": { "html": "12 points of Level 1 units", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -33314,10 +33223,7 @@
       "school": "Humanities",
       "availability": ["Not available in 2026"],
       "rules": {
-        "prerequisites": {
-          "html": "Completion of 12 points",
-          "units": []
-        }
+        "prerequisites": { "html": "Completion of 12 points", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -34470,10 +34376,7 @@
       "school": "Medical School",
       "availability": ["Semester 2"],
       "rules": {
-        "quota": {
-          "html": "160—first come first served basis",
-          "units": []
-        }
+        "quota": { "html": "160—first come first served basis", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -37079,10 +36982,7 @@
       "school": "Humanities",
       "availability": ["Semester 1"],
       "rules": {
-        "prerequisites": {
-          "html": "Any Level 2 Italian unit",
-          "units": []
-        }
+        "prerequisites": { "html": "Any Level 2 Italian unit", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -37106,10 +37006,7 @@
           "html": "<a data-unit=\"JAPN1403\">JAPN1403</a> Japanese 3",
           "units": ["JAPN1403"]
         },
-        "incompatibility": {
-          "html": "ATAR Japanese Year 12",
-          "units": []
-        }
+        "incompatibility": { "html": "ATAR Japanese Year 12", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": ["JAPN1403"],
@@ -43023,10 +42920,7 @@
           "html": "LING1103 Language, Culture and Society.<br>LING2203 Language Variation and Change LING2003 Language, Culture and Society",
           "units": ["LING1103", "LING2003", "LING2203"]
         },
-        "advisable": {
-          "html": "Any level 1 Linguistics unit.",
-          "units": []
-        }
+        "advisable": { "html": "Any level 1 Linguistics unit.", "units": [] }
       },
       "prereqUnits": ["LING1001", "LING1002"],
       "coreqUnits": [],
@@ -45039,9 +44933,7 @@
       "levelOfStudy": "Postgraduate",
       "school": "Office of the Deputy Vice-Chancellor Education",
       "availability": ["Semester 1", "Semester 2"],
-      "rules": {
-        "prerequisites": { "html": "prior approval", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "prior approval", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -45055,9 +44947,7 @@
       "levelOfStudy": "Postgraduate",
       "school": "Office of the Deputy Vice-Chancellor Education",
       "availability": ["Semester 1", "Semester 2"],
-      "rules": {
-        "prerequisites": { "html": "prior approval", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "prior approval", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -45071,9 +44961,7 @@
       "levelOfStudy": "Postgraduate",
       "school": "Office of the Deputy Vice-Chancellor Education",
       "availability": ["Semester 1", "Semester 2"],
-      "rules": {
-        "prerequisites": { "html": "prior approval", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "prior approval", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -45087,9 +44975,7 @@
       "levelOfStudy": "Postgraduate",
       "school": "Office of the Deputy Vice-Chancellor Education",
       "availability": ["Semester 1", "Semester 2"],
-      "rules": {
-        "prerequisites": { "html": "prior approval", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "prior approval", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -48248,10 +48134,7 @@
       "school": "Business School",
       "availability": ["Semester 2"],
       "rules": {
-        "prerequisites": {
-          "html": "any Level 2 Marketing unit",
-          "units": []
-        }
+        "prerequisites": { "html": "any Level 2 Marketing unit", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -50352,10 +50235,7 @@
       "school": "Music",
       "availability": ["Semester 1", "Semester 2"],
       "rules": {
-        "prerequisites": {
-          "html": "any Level 2 MUSC unit",
-          "units": []
-        },
+        "prerequisites": { "html": "any Level 2 MUSC unit", "units": [] },
         "corequisites": {
           "html": "enrolled in the Bachelor of Music<br><em>or</em> enrolled in the Music Studies major<br><em>or</em> enrolled in the Music General Studies major",
           "units": []
@@ -50867,10 +50747,7 @@
       "school": "Music",
       "availability": ["Not available in 2026"],
       "rules": {
-        "prerequisites": {
-          "html": "any MUSC Level 2 unit",
-          "units": []
-        }
+        "prerequisites": { "html": "any MUSC Level 2 unit", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -55797,10 +55674,7 @@
       "school": "Humanities",
       "availability": ["Semester 1"],
       "rules": {
-        "prerequisites": {
-          "html": "24 points of Level 1 units",
-          "units": []
-        },
+        "prerequisites": { "html": "24 points of Level 1 units", "units": [] },
         "incompatibility": {
           "html": "PHIL2205 Introduction to Logic",
           "units": ["PHIL2205"]
@@ -55862,10 +55736,7 @@
       "school": "Humanities",
       "availability": ["Semester 1"],
       "rules": {
-        "prerequisites": {
-          "html": "24 points of Level 1 units",
-          "units": []
-        },
+        "prerequisites": { "html": "24 points of Level 1 units", "units": [] },
         "incompatibility": {
           "html": "PHIL2270 Philosophy of Science",
           "units": ["PHIL2270"]
@@ -55884,9 +55755,7 @@
       "levelOfStudy": "Undergraduate",
       "school": "Humanities",
       "availability": ["Semester 2"],
-      "rules": {
-        "prerequisites": { "html": "any Level 1 unit", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "any Level 1 unit", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -55900,9 +55769,7 @@
       "levelOfStudy": "Undergraduate",
       "school": "Humanities",
       "availability": ["Semester 2"],
-      "rules": {
-        "prerequisites": { "html": "Any Level 1 unit", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "Any Level 1 unit", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -55959,10 +55826,7 @@
           "html": "<em> Successful completion of</em><div class=\"auto\">any level 2 Philosophy unit<br><em>or</em> <a data-unit=\"PPHE2211\">PPHE2211</a> History of Political Ideas<br><em>or</em> <a data-unit=\"HUMR2001\">HUMR2001</a> Global and Environmental Justice</div>",
           "units": ["HUMR2001", "PPHE2211"]
         },
-        "incompatibility": {
-          "html": "PHIL 2209 Moral Theory",
-          "units": []
-        }
+        "incompatibility": { "html": "PHIL 2209 Moral Theory", "units": [] }
       },
       "prereqUnits": ["HUMR2001", "PPHE2211"],
       "coreqUnits": [],
@@ -61785,10 +61649,7 @@
       "school": "Business School",
       "availability": ["Not available in 2026"],
       "rules": {
-        "prerequisites": {
-          "html": "Faculty approval required",
-          "units": []
-        }
+        "prerequisites": { "html": "Faculty approval required", "units": [] }
       },
       "prereqUnits": [],
       "coreqUnits": [],
@@ -64978,9 +64839,7 @@
         "Semester 1",
         "Semester 2"
       ],
-      "rules": {
-        "prerequisites": { "html": "prior approval", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "prior approval", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -64998,9 +64857,7 @@
         "Semester 1",
         "Semester 2"
       ],
-      "rules": {
-        "prerequisites": { "html": "prior approval", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "prior approval", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -65018,9 +64875,7 @@
         "Semester 1",
         "Semester 2"
       ],
-      "rules": {
-        "prerequisites": { "html": "prior approval", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "prior approval", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -65038,9 +64893,7 @@
         "Semester 1",
         "Semester 2"
       ],
-      "rules": {
-        "prerequisites": { "html": "prior approval", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "prior approval", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],
@@ -65290,10 +65143,7 @@
           "html": "<em> Successful completion of</em><div class=\"auto\"><a data-unit=\"RMED5312\">RMED5312</a> Integrated Rural Medical Practice 1—Notre Dame<br><em>and</em> <a data-unit=\"RMED5322\">RMED5322</a> Integrated Rural Medical Practice 2 - Notre Dame</div>",
           "units": ["RMED5312", "RMED5322"]
         },
-        "advisable": {
-          "html": "MEDI6300 (Notre Dame)",
-          "units": ["MEDI6300"]
-        }
+        "advisable": { "html": "MEDI6300 (Notre Dame)", "units": ["MEDI6300"] }
       },
       "prereqUnits": ["RMED5312", "RMED5322"],
       "coreqUnits": [],
@@ -65369,10 +65219,7 @@
           "html": "Notre Dame MED200 (equivalent to <a data-unit=\"IMED4222\">IMED4222</a> Integrated Rural Medical Practice 1 Part B)",
           "units": ["IMED4222"]
         },
-        "advisable": {
-          "html": "MEDI6300 (Notre Dame)",
-          "units": ["MEDI6300"]
-        }
+        "advisable": { "html": "MEDI6300 (Notre Dame)", "units": ["MEDI6300"] }
       },
       "prereqUnits": ["IMED4222"],
       "coreqUnits": [],
@@ -72697,9 +72544,7 @@
       "levelOfStudy": "Postgraduate",
       "school": "Humanities",
       "availability": ["Semester 1"],
-      "rules": {
-        "prerequisites": { "html": "prior approval", "units": [] }
-      },
+      "rules": { "prerequisites": { "html": "prior approval", "units": [] } },
       "prereqUnits": [],
       "coreqUnits": [],
       "incompatibleUnits": [],

@@ -46,6 +46,12 @@ interface Major {
   code: string;
   name: string;
   kind: "major" | "disambiguation";
+  /** "Major", "Extended Major", "Second Major" as the handbook heads the page. */
+  type: string;
+  /** Highlighted availability note, e.g. only open to re-enrolling students. */
+  note: string;
+  /** Admission prerequisite: the ATAR subjects or stream a student enters on. */
+  entry: string;
   levels: { level: string; groups: MajorGroup[] }[];
   variants: string[];
 }
@@ -71,6 +77,7 @@ const $compact = el<HTMLElement>("compact");
 const $compactList = el<HTMLDivElement>("compact-list");
 const $detail = el<HTMLElement>("detail");
 const $major = el<HTMLSelectElement>("major");
+const $majorMeta = el<HTMLParagraphElement>("major-meta");
 const $search = el<HTMLInputElement>("unit-search");
 const $options = el<HTMLDataListElement>("unit-options");
 const $outside = el<HTMLInputElement>("include-outside");
@@ -97,6 +104,62 @@ function note(kind: "info" | "error", body: string) {
 
 function clearNote() {
   $status.innerHTML = "";
+}
+
+// -------------------------------------------------- telling majors apart
+
+/**
+ * Names are not unique: the handbook runs three majors called Chemistry, two
+ * called Marine Science, two called Korean Studies. They are different unit
+ * maps, so the picker has to say which is which.
+ *
+ * Distinguishing information, in the order it is worth showing: the kind of
+ * major (a standard major and an extended major of the same name are the most
+ * common collision), whether it is closed to new students, and finally the
+ * admission prerequisite, which is what separates the language streams.
+ */
+function qualifier(major: Major): string {
+  const bits: string[] = [];
+  if (major.type && major.type !== "Major") bits.push(major.type.toLowerCase());
+  if (/re-enrolling/i.test(major.note)) bits.push("re-enrolling students only");
+  if (!bits.length && major.entry) bits.push(`entry: ${clip(major.entry, 44)}`);
+  return bits.join(", ");
+}
+
+/** Cut to a whole word, so a truncated prerequisite still reads as English. */
+function clip(text: string, max: number): string {
+  const flat = text.replace(/\s+/g, " ").trim();
+  if (flat.length <= max) return flat;
+  const cut = flat.slice(0, max);
+  return `${cut.slice(0, cut.lastIndexOf(" ")) || cut}…`;
+}
+
+/** Picker label: bare name when it is unique, name plus what sets it apart. */
+function majorLabel(major: Major, duplicated: Set<string>): string {
+  const name = major.name || major.code;
+  if (!duplicated.has(major.name)) return name;
+  const detail = qualifier(major);
+  return detail
+    ? `${name} — ${detail} (${major.code})`
+    : `${name} (${major.code})`;
+}
+
+/** One line under the picker naming exactly which major is on screen. */
+function renderMajorMeta(major: Major | null) {
+  if (!major) {
+    $majorMeta.innerHTML = "";
+    return;
+  }
+  const parts = [
+    `<span class="font-mono">${esc(major.code)}</span>`,
+    esc(major.type || "Major"),
+  ];
+  if (major.note) parts.push(esc(major.note.replace(/^Note:\s*/i, "")));
+  if (major.entry) parts.push(`Entry: ${esc(clip(major.entry, 120))}`);
+  parts.push(
+    `<a class="text-accent underline underline-offset-2" href="${HANDBOOK}/majordetails?code=${esc(major.code)}" target="_blank" rel="noopener">Handbook page</a>`,
+  );
+  $majorMeta.innerHTML = parts.join(' <span class="text-muted">·</span> ');
 }
 
 /** Skeleton that matches the real layout rather than a spinner. */
@@ -351,7 +414,8 @@ function buildElements(
     for (const code of visible) {
       const unit = units.get(code);
       if (!unit) continue;
-      for (const ref of unit.advisableUnits ?? []) addEdge(ref, code, "advisable");
+      for (const ref of unit.advisableUnits ?? [])
+        addEdge(ref, code, "advisable");
     }
   }
 
@@ -457,7 +521,13 @@ function pack(rankDir: "TB" | "LR", aspect: number) {
         })
         .run();
       const bb = component.boundingBox();
-      return { nodes: component.nodes(), x1: bb.x1, y1: bb.y1, w: bb.w, h: bb.h };
+      return {
+        nodes: component.nodes(),
+        x1: bb.x1,
+        y1: bb.y1,
+        w: bb.w,
+        h: bb.h,
+      };
     });
 
   const gap = isDesktop.matches ? 40 : 28;
@@ -824,6 +894,8 @@ function selectMajor(code: string) {
   const major = majors.find((m) => m.code === code);
   if (!major) return;
 
+  renderMajorMeta(major);
+
   if (major.kind === "disambiguation") {
     currentMajor = null;
     cy?.elements().remove();
@@ -833,9 +905,13 @@ function selectMajor(code: string) {
     const links = major.variants
       .map((v) => {
         const target = majors.find((m) => m.code === v);
-        return target
-          ? `<button type="button" data-major="${esc(v)}" class="rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-1.5 text-sm text-ink transition-colors hover:bg-surface-tint">${esc(target.name)} <span class="font-mono text-xs text-muted">${esc(v)}</span></button>`
-          : "";
+        if (!target) return "";
+        const detail = qualifier(target);
+        return `<button type="button" data-major="${esc(v)}" class="rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-1.5 text-sm text-ink transition-colors hover:bg-surface-tint">${esc(target.name)}${
+          detail
+            ? ` <span class="text-xs text-ink-soft">${esc(detail)}</span>`
+            : ""
+        } <span class="font-mono text-xs text-muted">${esc(v)}</span></button>`;
       })
       .filter(Boolean)
       .join("");
@@ -922,9 +998,17 @@ async function main() {
 
   $provenance.textContent = `Handbook ${graphData.year}, read on ${graphData.scrapedAt}.`;
 
+  const seen = new Set<string>();
+  const duplicated = new Set<string>();
+  for (const m of majors) {
+    if (seen.has(m.name)) duplicated.add(m.name);
+    seen.add(m.name);
+  }
+
   $major.innerHTML = majors
     .map(
-      (m) => `<option value="${esc(m.code)}">${esc(m.name || m.code)}</option>`,
+      (m) =>
+        `<option value="${esc(m.code)}">${esc(majorLabel(m, duplicated))}</option>`,
     )
     .join("");
 

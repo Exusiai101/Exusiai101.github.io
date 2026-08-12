@@ -267,6 +267,20 @@ function parseMajorPage(code, html) {
     .replace(/\s*\[[^\]]*\]\s*$/, "")
     .trim();
 
+  // Several majors share a name (three Chemistry majors, two Marine Science,
+  // two Korean Studies), so the name alone cannot identify one. These three
+  // fields are what the handbook itself uses to tell them apart: the page
+  // heading ("Major" / "Extended Major" / "Second Major"), the highlighted
+  // availability note, and the admission prerequisite.
+  const type = /^(.*?)\s*Overview$/
+    .exec($("h3").first().text().replace(/\s+/g, " ").trim())?.[1]
+    ?.trim();
+  const intro = section(html, "introduction_to_major") ?? "";
+  const note = toText(
+    cheerio.load(intro, null, false)("p.highlight-box").first().html(),
+  );
+  const entry = toText(sectionBody(html, "prerequisite_definition"));
+
   const levels = [];
 
   $(".unitsequence h4").each((_, h4) => {
@@ -344,6 +358,9 @@ function parseMajorPage(code, html) {
     code,
     name,
     kind: levels.length ? "major" : "disambiguation",
+    type: type || "",
+    note,
+    entry,
     levels,
     variants: levels.length ? [] : variants,
   };

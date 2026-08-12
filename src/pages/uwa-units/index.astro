@@ -1,8 +1,12 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { Icon } from 'astro-icon/components';
+import { profile, links } from '../../data/profile';
 
 const base = import.meta.env.BASE_URL;
+// Byline pulls from profile.ts rather than hardcoding, so the name and handle
+// stay in one place across the two pages.
+const github = links.find((link) => link.label === 'GitHub');
 ---
 
 <Base
@@ -247,9 +251,40 @@ const base = import.meta.env.BASE_URL;
         refreshed by hand when the handbook rolls over. <span id="provenance"></span> The
         handbook is the authoritative source; this page is a reading aid and can be out of
         date or wrong.
-
-        Inspired by Graph Algorithms in CITS3001. 
       </p>
+      <!--
+        Attribution sits on its own hairline rather than inside the paragraph
+        above, which is a disclaimer: a byline appended to it would read as
+        part of the caveat instead of as a credit.
+      -->
+      <div
+        class="mt-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-line pt-5"
+      >
+        <p class="text-sm text-ink-soft">
+          Built by
+          <a
+            href={base}
+            class="text-ink underline decoration-line underline-offset-4 transition-colors hover:decoration-accent"
+          >
+            {profile.name}
+          </a>
+          &middot; inspired by graph algorithms in CITS3001.
+        </p>
+
+        {
+          github && (
+            <a
+              href={github.href}
+              target="_blank"
+              rel="noopener"
+              class="meta inline-flex items-center gap-1.5 transition-colors hover:text-ink"
+            >
+              <Icon name={github.icon} class="h-3.5 w-3.5" />
+              {github.handle}
+            </a>
+          )
+        }
+      </div>
     </footer>
   </main>
 

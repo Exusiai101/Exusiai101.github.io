@@ -66,7 +66,12 @@ const base = import.meta.env.BASE_URL;
       style="--index:1"
       aria-label="Graph controls"
     >
-      <div class="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,2fr)] md:items-end">
+      <!--
+        items-start, not items-end: the major column carries a meta line under
+        its select and the search column does not, so bottom-alignment would
+        drop the search input by the height of that paragraph.
+      -->
+      <div class="grid gap-x-5 gap-y-4 md:grid-cols-2 md:items-start">
         <div>
           <label for="major" class="meta mb-1.5 block text-ink-soft">Major</label>
           <select
@@ -79,7 +84,7 @@ const base = import.meta.env.BASE_URL;
             Several majors share a name with a different unit map, so the code,
             kind and entry prerequisite of the selected one are spelled out here.
           -->
-          <p id="major-meta" class="mt-1.5 text-xs leading-relaxed text-ink-soft"></p>
+          <div id="major-meta" class="mt-2 space-y-1 text-xs leading-relaxed text-ink-soft"></div>
         </div>
 
         <div>
@@ -97,23 +102,27 @@ const base = import.meta.env.BASE_URL;
           <datalist id="unit-options"></datalist>
         </div>
 
-        <div class="grid gap-2 sm:grid-cols-3 md:col-span-2">
+        <!--
+          Wrap rather than thirds: the labels are short and unequal, so an
+          equal-column grid leaves each toggle mostly empty space.
+        -->
+        <div class="flex flex-wrap gap-2 md:col-span-2">
           <label
-            class="flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-2 text-sm text-ink-soft"
+            class="inline-flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-2 text-sm text-ink-soft transition-colors hover:border-muted hover:text-ink"
           >
             <input id="include-outside" type="checkbox" checked class="accent-accent" />
             Include prerequisites outside the major
           </label>
 
           <label
-            class="flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-2 text-sm text-ink-soft"
+            class="inline-flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-2 text-sm text-ink-soft transition-colors hover:border-muted hover:text-ink"
           >
             <input id="include-advisable" type="checkbox" checked class="accent-accent" />
             Show advisable prior study
           </label>
 
           <label
-            class="flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-2 text-sm text-ink-soft"
+            class="inline-flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-2 text-sm text-ink-soft transition-colors hover:border-muted hover:text-ink"
           >
             <input id="include-generic" type="checkbox" checked class="accent-accent" />
             Show "any Level N unit" rules
@@ -121,28 +130,32 @@ const base = import.meta.env.BASE_URL;
         </div>
       </div>
 
-      <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-4">
-        <span class="tag" style="background:var(--tag-core-bg);color:var(--tag-core-fg)">
-          Compulsory
-        </span>
-        <span class="tag" style="background:var(--tag-option-bg);color:var(--tag-option-fg)">
-          Option
-        </span>
-        <span class="tag" style="background:var(--surface-tint);color:var(--muted)">
-          Outside the major
-        </span>
-        <span
-          class="tag"
-          style="background:var(--surface-tint);color:var(--ink-soft);border:1px dashed var(--muted)"
-        >
-          Choose any one
-        </span>
-        <span class="meta">
+      <div class="mt-4 border-t border-line pt-4">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span class="tag" style="background:var(--tag-core-bg);color:var(--tag-core-fg)">
+            Compulsory
+          </span>
+          <span class="tag" style="background:var(--tag-option-bg);color:var(--tag-option-fg)">
+            Option
+          </span>
+          <span class="tag" style="background:var(--surface-tint);color:var(--muted)">
+            Outside the major
+          </span>
+          <span
+            class="tag"
+            style="background:var(--surface-tint);color:var(--ink-soft);border:1px dashed var(--muted)"
+          >
+            Choose any one
+          </span>
+        </div>
+        <!-- Its own row with a measure: as a flex sibling of the chips it
+             centred against them and ran the full width of the card. -->
+        <p class="meta mt-3 max-w-[80ch] leading-relaxed">
           Solid arrow: prerequisite. Dashed: co-requisite. Dotted: advisable prior study.
           Grey dashes into a rounded box: a choice, where any one of the units feeding it
           satisfies the rule. A dashed unit border means part of that unit's rule could
           not be drawn.
-        </span>
+        </p>
       </div>
     </section>
 

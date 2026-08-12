@@ -95,7 +95,7 @@ const $compact = el<HTMLElement>("compact");
 const $compactList = el<HTMLDivElement>("compact-list");
 const $detail = el<HTMLElement>("detail");
 const $major = el<HTMLSelectElement>("major");
-const $majorMeta = el<HTMLParagraphElement>("major-meta");
+const $majorMeta = el<HTMLDivElement>("major-meta");
 const $search = el<HTMLInputElement>("unit-search");
 const $options = el<HTMLDataListElement>("unit-options");
 const $outside = el<HTMLInputElement>("include-outside");
@@ -169,16 +169,31 @@ function renderMajorMeta(major: Major | null) {
     $majorMeta.innerHTML = "";
     return;
   }
-  const parts = [
+  /*
+    Two lines, not one run-on. The identity of the major is short and always
+    present; the admission prerequisite is a long sentence that has to be
+    clipped, and clipping it mid-word in the middle of a dot-separated list
+    read as broken text. Full text stays available as a tooltip.
+  */
+  const identity = [
     `<span class="font-mono">${esc(major.code)}</span>`,
     esc(major.type || "Major"),
   ];
-  if (major.note) parts.push(esc(major.note.replace(/^Note:\s*/i, "")));
-  if (major.entry) parts.push(`Entry: ${esc(clip(major.entry, 120))}`);
-  parts.push(
+  if (major.note) identity.push(esc(major.note.replace(/^Note:\s*/i, "")));
+  identity.push(
     `<a class="text-accent underline underline-offset-2" href="${HANDBOOK}/majordetails?code=${esc(major.code)}" target="_blank" rel="noopener">Handbook page</a>`,
   );
-  $majorMeta.innerHTML = parts.join(' <span class="text-muted">·</span> ');
+
+  const lines = [
+    `<p>${identity.join(' <span class="text-muted">·</span> ')}</p>`,
+  ];
+  if (major.entry) {
+    const full = major.entry.replace(/\s+/g, " ").trim();
+    lines.push(
+      `<p class="text-muted" title="${esc(full)}">Entry: ${esc(clip(full, 120))}</p>`,
+    );
+  }
+  $majorMeta.innerHTML = lines.join("");
 }
 
 /** Skeleton that matches the real layout rather than a spinner. */

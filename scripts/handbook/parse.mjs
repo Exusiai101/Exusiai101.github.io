@@ -12,14 +12,14 @@
 // <!--NULL x--> when absent), which is what makes this tractable. If UWA ever
 // drops those markers, report.json is what will tell you.
 
-import { mkdir, writeFile, readFile, readdir } from 'node:fs/promises';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import * as cheerio from 'cheerio';
+import { mkdir, writeFile, readFile, readdir } from "node:fs/promises";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import * as cheerio from "cheerio";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const CACHE = join(ROOT, '.cache', 'handbook');
-const OUT = join(ROOT, 'public', 'uwa-units');
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const CACHE = join(ROOT, ".cache", "handbook");
+const OUT = join(ROOT, "public", "uwa-units");
 
 const UNIT_CODE = /\b[A-Z]{4}\d{4}\b/g;
 const warnings = [];
@@ -45,10 +45,10 @@ function sectionBody(html, name) {
   const block = section(html, name);
   if (!block) return null;
   const $ = cheerio.load(block, null, false);
-  const parts = $('dd')
-    .map((_, el) => $(el).html() ?? '')
+  const parts = $("dd")
+    .map((_, el) => $(el).html() ?? "")
     .get();
-  return parts.length ? parts.join(' ') : block;
+  return parts.length ? parts.join(" ") : block;
 }
 
 /**
@@ -59,25 +59,25 @@ function sectionBody(html, name) {
  * become spaces or codes end up glued to the prose around them.
  */
 function toText(html) {
-  if (!html) return '';
+  if (!html) return "";
   const spaced = html
-    .replace(/<br\s*\/?>/gi, ' ')
-    .replace(/<(p|div|li|dd|dt|tr|td)\b[^>]*>/gi, ' $&')
-    .replace(/<\/(p|div|li|dd|dt|tr|td)>/gi, '$& ');
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<(p|div|li|dd|dt|tr|td)\b[^>]*>/gi, " $&")
+    .replace(/<\/(p|div|li|dd|dt|tr|td)>/gi, "$& ");
   return cheerio
     .load(spaced, null, false)
     .root()
     .text()
-    .replace(/\s+/g, ' ')
+    .replace(/\s+/g, " ")
     .trim();
 }
 
 /** Tidy a fragment for embedding in the page: drop target attrs, keep links. */
 function toHtml(html) {
-  if (!html) return '';
+  if (!html) return "";
   const $ = cheerio.load(html, null, false);
-  $('a').removeAttr('target');
-  return $.root().html()?.replace(/\s+/g, ' ').trim() ?? '';
+  $("a").removeAttr("target");
+  return $.root().html()?.replace(/\s+/g, " ").trim() ?? "";
 }
 
 /**
@@ -89,18 +89,20 @@ function toHtml(html) {
  * the site. Links to anything else (courses, majors) are kept as real links.
  */
 function ruleHtml(html) {
-  if (!html) return '';
+  if (!html) return "";
   const $ = cheerio.load(html, null, false);
-  $('a').each((_, el) => {
+  $("a").each((_, el) => {
     const $a = $(el);
-    $a.removeAttr('target');
-    const code = /unitdetails\?code=([A-Z]{4}\d{4})/.exec($a.attr('href') ?? '')?.[1];
+    $a.removeAttr("target");
+    const code = /unitdetails\?code=([A-Z]{4}\d{4})/.exec(
+      $a.attr("href") ?? "",
+    )?.[1];
     if (code) {
-      $a.removeAttr('href');
-      $a.attr('data-unit', code);
+      $a.removeAttr("href");
+      $a.attr("data-unit", code);
     }
   });
-  return $.root().html()?.replace(/\s+/g, ' ').trim() ?? '';
+  return $.root().html()?.replace(/\s+/g, " ").trim() ?? "";
 }
 
 /**
@@ -114,7 +116,7 @@ function referencedUnits(html) {
   const $ = cheerio.load(html, null, false);
   const codes = new Set();
   $('a[href*="code="]').each((_, el) => {
-    const m = /code=([A-Z]{4}\d{4})/.exec($(el).attr('href') ?? '');
+    const m = /code=([A-Z]{4}\d{4})/.exec($(el).attr("href") ?? "");
     if (m) codes.add(m[1]);
   });
   for (const m of toText(html).matchAll(UNIT_CODE)) codes.add(m[0]);
@@ -124,11 +126,11 @@ function referencedUnits(html) {
 // ------------------------------------------------------------ unit index
 
 const RULE_KEYS = {
-  prerequisites: 'prerequisites',
-  'co-requisites': 'corequisites',
-  corequisites: 'corequisites',
-  incompatibility: 'incompatibility',
-  'advisable prior study': 'advisable',
+  prerequisites: "prerequisites",
+  "co-requisites": "corequisites",
+  corequisites: "corequisites",
+  incompatibility: "incompatibility",
+  "advisable prior study": "advisable",
 };
 
 /**
@@ -140,45 +142,45 @@ function parseUnitIndex(html) {
   const $ = cheerio.load(html);
   const units = new Map();
 
-  $('li.filter-item').each((_, el) => {
+  $("li.filter-item").each((_, el) => {
     const $el = $(el);
-    const href = $el.find('a').first().attr('href') ?? '';
+    const href = $el.find("a").first().attr("href") ?? "";
     const code = /code=([A-Z]{4}\d{4})/.exec(href)?.[1];
     if (!code) return;
 
-    const heading = $el.find('h4').first().text().trim();
-    const title = heading.replace(/\s*\[[A-Z]{4}\d{4}\]\s*$/, '').trim();
+    const heading = $el.find("h4").first().text().trim();
+    const title = heading.replace(/\s*\[[A-Z]{4}\d{4}\]\s*$/, "").trim();
 
     const fields = new Map();
-    $el.find('dl dt').each((_, dt) => {
-      const key = $(dt).text().replace(/:\s*$/, '').trim().toLowerCase();
+    $el.find("dl dt").each((_, dt) => {
+      const key = $(dt).text().replace(/:\s*$/, "").trim().toLowerCase();
       const values = [];
-      for (let n = $(dt).next(); n.length && n.is('dd'); n = n.next()) {
+      for (let n = $(dt).next(); n.length && n.is("dd"); n = n.next()) {
         values.push(n.text().trim());
       }
       fields.set(key, values);
     });
 
-    const first = (key) => fields.get(key)?.[0] ?? '';
+    const first = (key) => fields.get(key)?.[0] ?? "";
 
     units.set(code, {
       code,
       title,
       subject: code.slice(0, 4),
-      credits: Number(first('credit points')) || null,
+      credits: Number(first("credit points")) || null,
       // The index omits "Level" for a fair number of units; the first digit of
       // the code carries the same information and is always present.
-      level: Number(first('level')) || Number(code[4]) || null,
-      levelOfStudy: first('level of study'),
-      school: first('school'),
-      fieldOfEducation: first('field of education'),
-      availability: fields.get('availability') ?? [],
-      location: fields.get('location') ?? [],
-      coordinators: first('coordinator(s)'),
+      level: Number(first("level")) || Number(code[4]) || null,
+      levelOfStudy: first("level of study"),
+      school: first("school"),
+      fieldOfEducation: first("field of education"),
+      availability: fields.get("availability") ?? [],
+      location: fields.get("location") ?? [],
+      coordinators: first("coordinator(s)"),
     });
   });
 
-  if (units.size === 0) warn('index', 'no units parsed from units-search.html');
+  if (units.size === 0) warn("index", "no units parsed from units-search.html");
   return units;
 }
 
@@ -186,22 +188,22 @@ function parseUnitIndex(html) {
 
 function parseUnitPage(code, html) {
   const rules = {};
-  const rulesBlock = section(html, 'unit_urules');
+  const rulesBlock = section(html, "unit_urules");
 
   if (rulesBlock) {
     const $ = cheerio.load(rulesBlock);
     let matched = 0;
-    $('dl.requirements dt').each((_, dt) => {
-      const label = $(dt).text().replace(/\s+/g, ' ').trim().toLowerCase();
+    $("dl.requirements dt").each((_, dt) => {
+      const label = $(dt).text().replace(/\s+/g, " ").trim().toLowerCase();
       const key = RULE_KEYS[label];
-      const body = $(dt).next('dd');
+      const body = $(dt).next("dd");
       if (!body.length) return;
       if (!key) {
         warn(code, `unrecognised rule heading "${label}"`);
         return;
       }
       matched++;
-      const fragment = body.html() ?? '';
+      const fragment = body.html() ?? "";
       // Only the HTML is kept: the page renders it directly, and carrying a
       // plain-text copy of every rule roughly doubled graph.json for nothing.
       rules[key] = {
@@ -213,23 +215,26 @@ function parseUnitPage(code, html) {
     // <tr><td> inside the <dl> rather than a dt/dd pair. No prerequisite
     // information is lost, but the cap itself matters when planning.
     if (matched === 0) {
-      const quota = /<em>Approved quota<\/em>\s*:\s*<\/b>([\s\S]*?)<\/td>/i.exec(rulesBlock);
+      const quota =
+        /<em>Approved quota<\/em>\s*:\s*<\/b>([\s\S]*?)<\/td>/i.exec(
+          rulesBlock,
+        );
       if (quota) {
         rules.quota = { html: ruleHtml(quota[1]), units: [] };
       } else {
-        warn(code, 'unit_urules present but no rule headings parsed');
+        warn(code, "unit_urules present but no rule headings parsed");
       }
     }
   }
 
   // Availability also lives on the unit page; the index is preferred, but this
   // is the fallback when a unit is missing from search results.
-  const offering = section(html, 'unit_offering');
+  const offering = section(html, "unit_offering");
   const availability = [];
   if (offering) {
     const $ = cheerio.load(offering);
-    $('tbody tr').each((_, tr) => {
-      const cell = cheerio.load(tr)('td').first().text().trim();
+    $("tbody tr").each((_, tr) => {
+      const cell = cheerio.load(tr)("td").first().text().trim();
       if (cell) availability.push(cell);
     });
   }
@@ -238,12 +243,12 @@ function parseUnitPage(code, html) {
     rules,
     availability,
     detail: {
-      description: toHtml(sectionBody(html, 'unit_content')),
-      outcomes: toHtml(sectionBody(html, 'unit_outcome')),
-      assessment: toHtml(sectionBody(html, 'unit_ams')),
-      contactHours: toHtml(sectionBody(html, 'unit_contact')),
-      coordinators: toText(sectionBody(html, 'unit_unitcoord')),
-      courseNotes: toHtml(sectionBody(html, 'unit_newCourses')),
+      description: toHtml(sectionBody(html, "unit_content")),
+      outcomes: toHtml(sectionBody(html, "unit_outcome")),
+      assessment: toHtml(sectionBody(html, "unit_ams")),
+      contactHours: toHtml(sectionBody(html, "unit_contact")),
+      coordinators: toText(sectionBody(html, "unit_unitcoord")),
+      courseNotes: toHtml(sectionBody(html, "unit_newCourses")),
     },
   };
 }
@@ -258,57 +263,57 @@ function parseUnitPage(code, html) {
  */
 function parseMajorPage(code, html) {
   const $ = cheerio.load(html);
-  const name = ($('meta[property="og:title"]').attr('content') ?? '')
-    .replace(/\s*\[[^\]]*\]\s*$/, '')
+  const name = ($('meta[property="og:title"]').attr("content") ?? "")
+    .replace(/\s*\[[^\]]*\]\s*$/, "")
     .trim();
 
   const levels = [];
 
-  $('.unitsequence h4').each((_, h4) => {
+  $(".unitsequence h4").each((_, h4) => {
     const levelLabel = $(h4).text().trim();
     const body = $(h4).next();
     if (!body.length) return;
 
     const groups = [];
-    let heading = '';
-    let take = '';
+    let heading = "";
+    let take = "";
 
-    body.find('h5, p, table[data-type]').each((_, el) => {
+    body.find("h5, p, table[data-type]").each((_, el) => {
       const $el = $(el);
-      if ($el.is('h5')) {
-        heading = $el.text().replace(/\s+/g, ' ').trim();
+      if ($el.is("h5")) {
+        heading = $el.text().replace(/\s+/g, " ").trim();
         return;
       }
-      if ($el.is('p')) {
-        const text = $el.text().replace(/\s+/g, ' ').trim();
-        if (/^Take\b/i.test(text)) take = text.replace(/:\s*$/, '');
+      if ($el.is("p")) {
+        const text = $el.text().replace(/\s+/g, " ").trim();
+        if (/^Take\b/i.test(text)) take = text.replace(/:\s*$/, "");
         return;
       }
 
       const units = [];
-      $el.find('tbody tr').each((_, tr) => {
+      $el.find("tbody tr").each((_, tr) => {
         const $tr = $(tr);
         const unitCode = /code=([A-Z]{4}\d{4})/.exec(
-          $tr.find('a[href*="code="]').first().attr('href') ?? '',
+          $tr.find('a[href*="code="]').first().attr("href") ?? "",
         )?.[1];
         if (!unitCode) return;
-        const cells = $tr.find('td');
+        const cells = $tr.find("td");
         // The table's "unit requirements" column restates the unit's own rule,
         // which the detail panel already shows from the unit page. Skipping it
         // keeps majors.json small.
         units.push({
           code: unitCode,
-          availability: $(cells[0]).text().replace(/\s+/g, ' ').trim(),
+          availability: $(cells[0]).text().replace(/\s+/g, " ").trim(),
         });
       });
       if (!units.length) return;
 
       groups.push({
-        label: heading || 'Units',
+        label: heading || "Units",
         take,
         // "Take all units (24 points)" is compulsory; anything phrased as a
         // points value is a choice between alternatives.
-        kind: /^take all\b/i.test(take) ? 'core' : 'option',
+        kind: /^take all\b/i.test(take) ? "core" : "option",
         units,
       });
     });
@@ -321,20 +326,24 @@ function parseMajorPage(code, html) {
   // so the page can point at them instead of rendering an empty graph.
   const variants = [
     ...new Set(
-      [...($('.content').html() ?? '').matchAll(/majordetails\?code=([A-Z]{3}-[A-Z0-9]+)/g)]
+      [
+        ...($(".content").html() ?? "").matchAll(
+          /majordetails\?code=([A-Z]{3}-[A-Z0-9]+)/g,
+        ),
+      ]
         .map((m) => m[1])
         .filter((c) => c !== code),
     ),
   ];
 
   if (!levels.length && !variants.length) {
-    warn(code, 'no unit tables and no variant links parsed from major page');
+    warn(code, "no unit tables and no variant links parsed from major page");
   }
 
   return {
     code,
     name,
-    kind: levels.length ? 'major' : 'disambiguation',
+    kind: levels.length ? "major" : "disambiguation",
     levels,
     variants: levels.length ? [] : variants,
   };
@@ -351,37 +360,42 @@ async function cachedFiles(dir) {
 }
 
 async function main() {
-  const unitsIndexHtml = await readFile(join(CACHE, 'units-search.html'), 'utf8');
+  const unitsIndexHtml = await readFile(
+    join(CACHE, "units-search.html"),
+    "utf8",
+  );
   const units = parseUnitIndex(unitsIndexHtml);
   console.log(`Indexed ${units.size} units`);
 
   const year =
     /Handbook\s+(\d{4})/.exec(
-      cheerio.load(unitsIndexHtml)('meta[property="og:site_name"]').attr('content') ?? '',
+      cheerio
+        .load(unitsIndexHtml)('meta[property="og:site_name"]')
+        .attr("content") ?? "",
     )?.[1] ?? null;
 
   // Units
   const detailsBySubject = new Map();
-  const unitFiles = await cachedFiles('units');
+  const unitFiles = await cachedFiles("units");
   let withDetail = 0;
 
   for (const file of unitFiles) {
-    const code = file.replace(/\.html$/, '');
-    const html = await readFile(join(CACHE, 'units', file), 'utf8');
+    const code = file.replace(/\.html$/, "");
+    const html = await readFile(join(CACHE, "units", file), "utf8");
     const parsed = parseUnitPage(code, html);
 
     const unit = units.get(code) ?? {
       code,
-      title: '',
+      title: "",
       subject: code.slice(0, 4),
       credits: null,
       level: null,
-      levelOfStudy: '',
-      school: '',
-      fieldOfEducation: '',
+      levelOfStudy: "",
+      school: "",
+      fieldOfEducation: "",
       availability: [],
       location: [],
-      coordinators: '',
+      coordinators: "",
     };
 
     unit.rules = parsed.rules;
@@ -393,7 +407,8 @@ async function main() {
     units.set(code, unit);
     withDetail++;
 
-    if (!detailsBySubject.has(unit.subject)) detailsBySubject.set(unit.subject, {});
+    if (!detailsBySubject.has(unit.subject))
+      detailsBySubject.set(unit.subject, {});
     detailsBySubject.get(unit.subject)[code] = parsed.detail;
   }
 
@@ -408,24 +423,27 @@ async function main() {
     }
   }
   if (missing.size) {
-    warn('graph', `${missing.size} prerequisite codes not in the catalogue: ${[...missing].sort().join(', ')}`);
+    warn(
+      "graph",
+      `${missing.size} prerequisite codes not in the catalogue: ${[...missing].sort().join(", ")}`,
+    );
   }
 
   // Majors
   const majors = [];
-  for (const file of await cachedFiles('majors')) {
-    const code = file.replace(/\.html$/, '');
-    const html = await readFile(join(CACHE, 'majors', file), 'utf8');
+  for (const file of await cachedFiles("majors")) {
+    const code = file.replace(/\.html$/, "");
+    const html = await readFile(join(CACHE, "majors", file), "utf8");
     majors.push(parseMajorPage(code, html));
   }
   majors.sort((a, b) => a.name.localeCompare(b.name));
   console.log(`Parsed ${majors.length} majors`);
 
   // Write
-  await mkdir(join(OUT, 'details'), { recursive: true });
+  await mkdir(join(OUT, "details"), { recursive: true });
 
   const scrapedAt = new Date().toISOString().slice(0, 10);
-  const meta = { year, scrapedAt, source: 'https://www.handbooks.uwa.edu.au' };
+  const meta = { year, scrapedAt, source: "https://www.handbooks.uwa.edu.au" };
 
   // graph.json is fetched on every page load, so it carries only what the graph
   // draws. Coordinators, locations and long prose stay in details/<PREFIX>.json,
@@ -447,19 +465,39 @@ async function main() {
       advisableUnits: u.advisableUnits ?? [],
     }));
 
-  await writeFile(join(OUT, 'graph.json'), JSON.stringify({ ...meta, units: graphUnits }));
-  await writeFile(join(OUT, 'majors.json'), JSON.stringify({ ...meta, majors }));
+  await writeFile(
+    join(OUT, "graph.json"),
+    JSON.stringify({ ...meta, units: graphUnits }),
+  );
+  await writeFile(
+    join(OUT, "majors.json"),
+    JSON.stringify({ ...meta, majors }),
+  );
   for (const [subject, entries] of detailsBySubject) {
-    await writeFile(join(OUT, 'details', `${subject}.json`), JSON.stringify(entries));
+    await writeFile(
+      join(OUT, "details", `${subject}.json`),
+      JSON.stringify(entries),
+    );
   }
   await writeFile(
-    join(OUT, 'report.json'),
-    JSON.stringify({ ...meta, unitsIndexed: units.size, unitPagesParsed: withDetail, majors: majors.length, warnings }, null, 2),
+    join(OUT, "report.json"),
+    JSON.stringify(
+      {
+        ...meta,
+        unitsIndexed: units.size,
+        unitPagesParsed: withDetail,
+        majors: majors.length,
+        warnings,
+      },
+      null,
+      2,
+    ),
   );
 
   console.log(`\nHandbook ${year}, scraped ${scrapedAt}`);
   console.log(`${warnings.length} warnings -> public/uwa-units/report.json`);
-  for (const w of warnings.slice(0, 15)) console.log(`  ${w.scope}: ${w.message}`);
+  for (const w of warnings.slice(0, 15))
+    console.log(`  ${w.scope}: ${w.message}`);
   if (warnings.length > 15) console.log(`  ... ${warnings.length - 15} more`);
 }
 

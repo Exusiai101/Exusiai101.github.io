@@ -11,26 +11,26 @@
 // Politeness: 4 at a time with a small delay. This runs once a year against a
 // university's public site, so it should stay well under anything they'd notice.
 
-import { mkdir, writeFile, readFile, access } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { mkdir, writeFile, readFile, access } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const CACHE = join(ROOT, '.cache', 'handbook');
-const BASE = 'https://www.handbooks.uwa.edu.au';
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const CACHE = join(ROOT, ".cache", "handbook");
+const BASE = "https://www.handbooks.uwa.edu.au";
 
 const USER_AGENT =
-  'Exusiai101-handbook-graph/1.0 (+https://exusiai101.github.io/uwa-units/; personal course-planning project; annual scrape)';
+  "Exusiai101-handbook-graph/1.0 (+https://exusiai101.github.io/uwa-units/; personal course-planning project; annual scrape)";
 
 const CONCURRENCY = 4;
 const DELAY_MS = 150;
 const MAX_ATTEMPTS = 4;
 
 const args = process.argv.slice(2);
-const REFRESH = args.includes('--refresh');
-const ONLY = (args.find((a) => a.startsWith('--only=')) ?? '')
-  .replace('--only=', '')
-  .split(',')
+const REFRESH = args.includes("--refresh");
+const ONLY = (args.find((a) => a.startsWith("--only=")) ?? "")
+  .replace("--only=", "")
+  .split(",")
   .map((s) => s.trim().toUpperCase())
   .filter(Boolean);
 
@@ -50,7 +50,7 @@ async function get(url) {
   let lastErr;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
-      const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT } });
+      const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.text();
     } catch (err) {
@@ -58,17 +58,19 @@ async function get(url) {
       if (attempt < MAX_ATTEMPTS) await sleep(500 * 2 ** (attempt - 1));
     }
   }
-  throw new Error(`${url} failed after ${MAX_ATTEMPTS} attempts: ${lastErr.message}`);
+  throw new Error(
+    `${url} failed after ${MAX_ATTEMPTS} attempts: ${lastErr.message}`,
+  );
 }
 
 /** Download to `path` unless it is already cached. Returns 'cached' | 'fetched'. */
 async function cache(url, path) {
-  if (!REFRESH && (await exists(path))) return 'cached';
+  if (!REFRESH && (await exists(path))) return "cached";
   const body = await get(url);
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, body);
   await sleep(DELAY_MS);
-  return 'fetched';
+  return "fetched";
 }
 
 /** Run `task` over `items` with a fixed worker pool, logging progress. */
@@ -83,19 +85,21 @@ async function pool(label, items, task) {
       const item = queue.shift();
       if (item === undefined) return;
       try {
-        if ((await task(item)) === 'fetched') fetched++;
+        if ((await task(item)) === "fetched") fetched++;
       } catch (err) {
         failures.push(`${item}: ${err.message}`);
       }
       done++;
       if (done % 100 === 0 || done === items.length) {
-        process.stdout.write(`\r  ${label}: ${done}/${items.length} (${fetched} fetched)`);
+        process.stdout.write(
+          `\r  ${label}: ${done}/${items.length} (${fetched} fetched)`,
+        );
       }
     }
   };
 
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
-  process.stdout.write('\n');
+  process.stdout.write("\n");
   if (failures.length) {
     console.warn(`  ${failures.length} failed:`);
     for (const f of failures.slice(0, 20)) console.warn(`    ${f}`);
@@ -115,32 +119,49 @@ function codesFrom(html, pattern) {
 async function main() {
   await mkdir(CACHE, { recursive: true });
 
-  console.log('Index pages');
-  await cache(`${BASE}/search/?type=units&searchtext=`, join(CACHE, 'units-search.html'));
-  await cache(`${BASE}/search/?type=majors&searchtext=`, join(CACHE, 'majors-search.html'));
+  console.log("Index pages");
+  await cache(
+    `${BASE}/search/?type=units&searchtext=`,
+    join(CACHE, "units-search.html"),
+  );
+  await cache(
+    `${BASE}/search/?type=majors&searchtext=`,
+    join(CACHE, "majors-search.html"),
+  );
 
-  const unitsIndex = await readFile(join(CACHE, 'units-search.html'), 'utf8');
-  const majorsIndex = await readFile(join(CACHE, 'majors-search.html'), 'utf8');
+  const unitsIndex = await readFile(join(CACHE, "units-search.html"), "utf8");
+  const majorsIndex = await readFile(join(CACHE, "majors-search.html"), "utf8");
 
   let unitCodes = codesFrom(unitsIndex, /unitdetails\?code=([A-Z]{4}\d{4})/g);
-  let majorCodes = codesFrom(majorsIndex, /majordetails\?code=([A-Z]{3}-[A-Z0-9]+)/g);
+  let majorCodes = codesFrom(
+    majorsIndex,
+    /majordetails\?code=([A-Z]{3}-[A-Z0-9]+)/g,
+  );
 
   // --only narrows units (the expensive half) but always keeps every major:
   // 155 pages is cheap, and major structure is what the graph is scoped by.
   if (ONLY.length) {
     unitCodes = unitCodes.filter((c) => ONLY.includes(c.slice(0, 4)));
-    console.log(`--only=${ONLY.join(',')}: ${unitCodes.length} units, all ${majorCodes.length} majors`);
+    console.log(
+      `--only=${ONLY.join(",")}: ${unitCodes.length} units, all ${majorCodes.length} majors`,
+    );
   }
 
   console.log(`Units (${unitCodes.length})`);
-  await pool('units', unitCodes, (code) =>
-    cache(`${BASE}/unitdetails?code=${code}`, join(CACHE, 'units', `${code}.html`)),
+  await pool("units", unitCodes, (code) =>
+    cache(
+      `${BASE}/unitdetails?code=${code}`,
+      join(CACHE, "units", `${code}.html`),
+    ),
   );
 
   if (majorCodes.length) {
     console.log(`Majors (${majorCodes.length})`);
-    await pool('majors', majorCodes, (code) =>
-      cache(`${BASE}/majordetails?code=${code}`, join(CACHE, 'majors', `${code}.html`)),
+    await pool("majors", majorCodes, (code) =>
+      cache(
+        `${BASE}/majordetails?code=${code}`,
+        join(CACHE, "majors", `${code}.html`),
+      ),
     );
 
     // Some majors (languages, engineering) are disambiguation pages that only
@@ -149,22 +170,33 @@ async function main() {
     const seen = new Set(majorCodes);
     const discovered = new Set();
     for (const code of majorCodes) {
-      const page = await readFile(join(CACHE, 'majors', `${code}.html`), 'utf8');
-      const body = /START PAGE CONTENT([\s\S]*?)END PAGE CONTENT/.exec(page)?.[1] ?? '';
-      for (const m of body.matchAll(/majordetails\?code=([A-Z]{3}-[A-Z0-9]+)/g)) {
+      const page = await readFile(
+        join(CACHE, "majors", `${code}.html`),
+        "utf8",
+      );
+      const body =
+        /START PAGE CONTENT([\s\S]*?)END PAGE CONTENT/.exec(page)?.[1] ?? "";
+      for (const m of body.matchAll(
+        /majordetails\?code=([A-Z]{3}-[A-Z0-9]+)/g,
+      )) {
         if (!seen.has(m[1])) discovered.add(m[1]);
       }
     }
 
     if (discovered.size) {
       console.log(`Linked majors not in the index (${discovered.size})`);
-      await pool('linked', [...discovered], (code) =>
-        cache(`${BASE}/majordetails?code=${code}`, join(CACHE, 'majors', `${code}.html`)),
+      await pool("linked", [...discovered], (code) =>
+        cache(
+          `${BASE}/majordetails?code=${code}`,
+          join(CACHE, "majors", `${code}.html`),
+        ),
       );
     }
   }
 
-  console.log(`\nCache ready at .cache/handbook. Next: node scripts/handbook/parse.mjs`);
+  console.log(
+    `\nCache ready at .cache/handbook. Next: node scripts/handbook/parse.mjs`,
+  );
 }
 
 main().catch((err) => {

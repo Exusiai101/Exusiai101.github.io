@@ -1,1 +1,90 @@
-{"ENRL8531":{"description":"This unit is run by the University of Tasmania with the unit code KEA703. See the University of Tasmania's <a href=\"https://courses.utas.edu.au\">courses and units</a> for more information.","outcomes":"","assessment":"<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>","contactHours":"","coordinators":"","courseNotes":""},"ENRL8532":{"description":"This unit is run by the University of Tasmania with the unit code KEA701. See the University of Tasmania's <a href=\"https://courses.utas.edu.au\">courses and units</a> for more information.","outcomes":"","assessment":"<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>","contactHours":"","coordinators":"","courseNotes":""},"ENRL8533":{"description":"This unit is run by the University of Tasmania with the unit code KEA704. See the University of Tasmania's <a href=\"https://courses.utas.edu.au\">courses and units</a> for more information.","outcomes":"","assessment":"<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>","contactHours":"","coordinators":"","courseNotes":""},"ENRL8534":{"description":"This unit is run by the University of Tasmania with the unit code KEA706. See the University of Tasmania's <a href=\"https://courses.utas.edu.au\">courses and units for more information.</a>","outcomes":"","assessment":"<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>","contactHours":"","coordinators":"","courseNotes":""},"ENRL8535":{"description":"This unit is run by the University of Tasmania with the unit code KEA705. See the University of Tasmania's <a href=\"https://courses.utas.edu.au\">courses and units</a> for more information.","outcomes":"","assessment":"<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>","contactHours":"","coordinators":"","courseNotes":""},"ENRL8538":{"description":"This unit is run by Curtin University with the unit code ECON6008. See the <a href=\"https://handbook.curtin.edu.au/unitSearch.html\">Curtin University</a> website for more information.","outcomes":"","assessment":"<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>","contactHours":"","coordinators":"","courseNotes":""},"ENRL8541":{"description":"This unit is run by Curtin University with the unit code 313412. See the <a href=\"https://handbook.curtin.edu.au/unitSearch.html\">Curtin University</a> website for more information.","outcomes":"","assessment":"<p>Indicative assessments in this unit are as follows: see Curtin Handbook. Further information is available in the unit outline.</p><p> <br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>","contactHours":"","coordinators":"","courseNotes":""},"ENRL8542":{"description":"This unit is run by Curtin University with the unit code ECON6013. See the <a href=\"https://handbook.curtin.edu.au/unitSearch.html\">Curtin University</a> website for more information.","outcomes":"","assessment":"<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>","contactHours":"","coordinators":"","courseNotes":""},"ENRL8544":{"description":"This unit is run by James Cook University with the unit code EA5024. See the <a href=\"https://secure.jcu.edu.au/app/studyfinder/?subject=EA5024\">James Cook University</a> website for more information.","outcomes":"","assessment":"<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>","contactHours":"","coordinators":"","courseNotes":""},"ENRL8549":{"description":"This unit is run by Curtin University with the unit code ECON6015. Refer to Curtin University <a href=\"https://handbook.curtin.edu.au/unitSearch.html\">handbook for more information.</a>","outcomes":"<p>Students are able to refer to Curtin University's handbook for this information.</p>","assessment":"<p>Indicative assessments in this unit are as follows: n/a. Further information is available in the unit outline.</p><p> <br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>","contactHours":"","coordinators":"n/a","courseNotes":""},"ENRL8592":{"description":"This unit is run by the University of Tasmania with the unit code KEA713. See the University of Tasmania's <a href=\"https://courses.utas.edu.au/\">courses and units</a> for more information.","outcomes":"","assessment":"<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>","contactHours":"","coordinators":"","courseNotes":""}}
+{
+  "ENRL8531": {
+    "description": "This unit is run by the University of Tasmania with the unit code KEA703. See the University of Tasmania's <a href=\"https://courses.utas.edu.au\">courses and units</a> for more information.",
+    "outcomes": "",
+    "assessment": "<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>",
+    "contactHours": "",
+    "coordinators": "",
+    "courseNotes": ""
+  },
+  "ENRL8532": {
+    "description": "This unit is run by the University of Tasmania with the unit code KEA701. See the University of Tasmania's <a href=\"https://courses.utas.edu.au\">courses and units</a> for more information.",
+    "outcomes": "",
+    "assessment": "<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>",
+    "contactHours": "",
+    "coordinators": "",
+    "courseNotes": ""
+  },
+  "ENRL8533": {
+    "description": "This unit is run by the University of Tasmania with the unit code KEA704. See the University of Tasmania's <a href=\"https://courses.utas.edu.au\">courses and units</a> for more information.",
+    "outcomes": "",
+    "assessment": "<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>",
+    "contactHours": "",
+    "coordinators": "",
+    "courseNotes": ""
+  },
+  "ENRL8534": {
+    "description": "This unit is run by the University of Tasmania with the unit code KEA706. See the University of Tasmania's <a href=\"https://courses.utas.edu.au\">courses and units for more information.</a>",
+    "outcomes": "",
+    "assessment": "<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>",
+    "contactHours": "",
+    "coordinators": "",
+    "courseNotes": ""
+  },
+  "ENRL8535": {
+    "description": "This unit is run by the University of Tasmania with the unit code KEA705. See the University of Tasmania's <a href=\"https://courses.utas.edu.au\">courses and units</a> for more information.",
+    "outcomes": "",
+    "assessment": "<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>",
+    "contactHours": "",
+    "coordinators": "",
+    "courseNotes": ""
+  },
+  "ENRL8538": {
+    "description": "This unit is run by Curtin University with the unit code ECON6008. See the <a href=\"https://handbook.curtin.edu.au/unitSearch.html\">Curtin University</a> website for more information.",
+    "outcomes": "",
+    "assessment": "<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>",
+    "contactHours": "",
+    "coordinators": "",
+    "courseNotes": ""
+  },
+  "ENRL8541": {
+    "description": "This unit is run by Curtin University with the unit code 313412. See the <a href=\"https://handbook.curtin.edu.au/unitSearch.html\">Curtin University</a> website for more information.",
+    "outcomes": "",
+    "assessment": "<p>Indicative assessments in this unit are as follows: see Curtin Handbook. Further information is available in the unit outline.</p><p> <br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>",
+    "contactHours": "",
+    "coordinators": "",
+    "courseNotes": ""
+  },
+  "ENRL8542": {
+    "description": "This unit is run by Curtin University with the unit code ECON6013. See the <a href=\"https://handbook.curtin.edu.au/unitSearch.html\">Curtin University</a> website for more information.",
+    "outcomes": "",
+    "assessment": "<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>",
+    "contactHours": "",
+    "coordinators": "",
+    "courseNotes": ""
+  },
+  "ENRL8544": {
+    "description": "This unit is run by James Cook University with the unit code EA5024. See the <a href=\"https://secure.jcu.edu.au/app/studyfinder/?subject=EA5024\">James Cook University</a> website for more information.",
+    "outcomes": "",
+    "assessment": "<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>",
+    "contactHours": "",
+    "coordinators": "",
+    "courseNotes": ""
+  },
+  "ENRL8549": {
+    "description": "This unit is run by Curtin University with the unit code ECON6015. Refer to Curtin University <a href=\"https://handbook.curtin.edu.au/unitSearch.html\">handbook for more information.</a>",
+    "outcomes": "<p>Students are able to refer to Curtin University's handbook for this information.</p>",
+    "assessment": "<p>Indicative assessments in this unit are as follows: n/a. Further information is available in the unit outline.</p><p> <br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>",
+    "contactHours": "",
+    "coordinators": "n/a",
+    "courseNotes": ""
+  },
+  "ENRL8592": {
+    "description": "This unit is run by the University of Tasmania with the unit code KEA713. See the University of Tasmania's <a href=\"https://courses.utas.edu.au/\">courses and units</a> for more information.",
+    "outcomes": "",
+    "assessment": "<p></p><p><br><br></p><p>Student may be offered supplementary assessment in this unit if they meet the eligibility criteria.</p>",
+    "contactHours": "",
+    "coordinators": "",
+    "courseNotes": ""
+  }
+}

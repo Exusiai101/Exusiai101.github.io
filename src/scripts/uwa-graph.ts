@@ -4,8 +4,8 @@
 // graph.json holds every unit with its rule text; the heavier prose is split
 // per subject prefix and only fetched when a unit is actually selected.
 
-import cytoscape from 'cytoscape';
-import dagre from 'cytoscape-dagre';
+import cytoscape from "cytoscape";
+import dagre from "cytoscape-dagre";
 
 cytoscape.use(dagre);
 
@@ -16,7 +16,8 @@ interface Rule {
   units: string[];
 }
 
-type RuleKind = 'prerequisites' | 'corequisites' | 'incompatibility' | 'advisable' | 'quota';
+type RuleKind =
+  "prerequisites" | "corequisites" | "incompatibility" | "advisable" | "quota";
 
 interface Unit {
   code: string;
@@ -37,14 +38,14 @@ interface Unit {
 interface MajorGroup {
   label: string;
   take: string;
-  kind: 'core' | 'option';
+  kind: "core" | "option";
   units: { code: string; availability: string; requirements: string }[];
 }
 
 interface Major {
   code: string;
   name: string;
-  kind: 'major' | 'disambiguation';
+  kind: "major" | "disambiguation";
   levels: { level: string; groups: MajorGroup[] }[];
   variants: string[];
 }
@@ -57,43 +58,44 @@ interface UnitDetail {
   coordinators: string;
 }
 
-type Membership = 'core' | 'option' | 'outside';
+type Membership = "core" | "option" | "outside";
 
 // ------------------------------------------------------------- dom helpers
 
-const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+const el = <T extends HTMLElement>(id: string) =>
+  document.getElementById(id) as T;
 
-const $status = el<HTMLDivElement>('status');
-const $workspace = el<HTMLElement>('workspace');
-const $compact = el<HTMLElement>('compact');
-const $compactList = el<HTMLDivElement>('compact-list');
-const $detail = el<HTMLElement>('detail');
-const $major = el<HTMLSelectElement>('major');
-const $search = el<HTMLInputElement>('unit-search');
-const $options = el<HTMLDataListElement>('unit-options');
-const $outside = el<HTMLInputElement>('include-outside');
-const $overlay = el<HTMLDivElement>('overlay');
-const $provenance = el<HTMLSpanElement>('provenance');
+const $status = el<HTMLDivElement>("status");
+const $workspace = el<HTMLElement>("workspace");
+const $compact = el<HTMLElement>("compact");
+const $compactList = el<HTMLDivElement>("compact-list");
+const $detail = el<HTMLElement>("detail");
+const $major = el<HTMLSelectElement>("major");
+const $search = el<HTMLInputElement>("unit-search");
+const $options = el<HTMLDataListElement>("unit-options");
+const $outside = el<HTMLInputElement>("include-outside");
+const $overlay = el<HTMLDivElement>("overlay");
+const $provenance = el<HTMLSpanElement>("provenance");
 
 const BASE = import.meta.env.BASE_URL;
-const HANDBOOK = 'https://www.handbooks.uwa.edu.au';
+const HANDBOOK = "https://www.handbooks.uwa.edu.au";
 
 /** Escape anything that came from the handbook before it goes into innerHTML. */
 function esc(value: string): string {
   return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
-function note(kind: 'info' | 'error', body: string) {
-  const border = kind === 'error' ? 'var(--tag-warn-fg)' : 'var(--line)';
+function note(kind: "info" | "error", body: string) {
+  const border = kind === "error" ? "var(--tag-warn-fg)" : "var(--line)";
   $status.innerHTML = `<div class="rounded-[var(--radius-card)] border bg-surface p-4 text-sm text-ink-soft" style="border-color:${border}">${body}</div>`;
 }
 
 function clearNote() {
-  $status.innerHTML = '';
+  $status.innerHTML = "";
 }
 
 /** Skeleton that matches the real layout rather than a spinner. */
@@ -120,86 +122,103 @@ function tokens() {
   const style = getComputedStyle(document.documentElement);
   const read = (name: string) => style.getPropertyValue(name).trim();
   return {
-    surface: read('--surface'),
-    surfaceTint: read('--surface-tint'),
-    line: read('--line'),
-    ink: read('--ink'),
-    inkSoft: read('--ink-soft'),
-    muted: read('--muted'),
-    accent: read('--accent'),
-    coreBg: read('--tag-core-bg'),
-    coreFg: read('--tag-core-fg'),
-    optionBg: read('--tag-option-bg'),
-    optionFg: read('--tag-option-fg'),
-    warnFg: read('--tag-warn-fg'),
+    surface: read("--surface"),
+    surfaceTint: read("--surface-tint"),
+    line: read("--line"),
+    ink: read("--ink"),
+    inkSoft: read("--ink-soft"),
+    muted: read("--muted"),
+    accent: read("--accent"),
+    coreBg: read("--tag-core-bg"),
+    coreFg: read("--tag-core-fg"),
+    optionBg: read("--tag-option-bg"),
+    optionFg: read("--tag-option-fg"),
+    warnFg: read("--tag-warn-fg"),
   };
 }
 
 function stylesheet(t: ReturnType<typeof tokens>): cytoscape.StylesheetJson {
   return [
     {
-      selector: 'node',
+      selector: "node",
       style: {
-        shape: 'round-rectangle',
-        'corner-radius': 6,
+        shape: "round-rectangle",
+        "corner-radius": 6,
         width: 148,
         height: 54,
-        'background-color': t.surface,
-        'border-width': 1,
-        'border-color': t.line,
-        label: 'data(label)',
+        "background-color": t.surface,
+        "border-width": 1,
+        "border-color": t.line,
+        label: "data(label)",
         color: t.ink,
-        'font-family': 'Geist Variable, sans-serif',
-        'font-size': 11,
-        'text-wrap': 'wrap',
-        'text-max-width': '130px',
-        'text-valign': 'center',
-        'text-halign': 'center',
-        'line-height': 1.35,
+        "font-family": "Geist Variable, sans-serif",
+        "font-size": 11,
+        "text-wrap": "wrap",
+        "text-max-width": "130px",
+        "text-valign": "center",
+        "text-halign": "center",
+        "line-height": 1.35,
       },
     },
     {
       selector: 'node[membership = "core"]',
-      style: { 'background-color': t.coreBg, 'border-color': t.coreFg, color: t.ink },
+      style: {
+        "background-color": t.coreBg,
+        "border-color": t.coreFg,
+        color: t.ink,
+      },
     },
     {
       selector: 'node[membership = "option"]',
-      style: { 'background-color': t.optionBg, 'border-color': t.optionFg, color: t.ink },
+      style: {
+        "background-color": t.optionBg,
+        "border-color": t.optionFg,
+        color: t.ink,
+      },
     },
     {
       selector: 'node[membership = "outside"]',
-      style: { 'background-color': t.surfaceTint, 'border-color': t.line, color: t.inkSoft },
+      style: {
+        "background-color": t.surfaceTint,
+        "border-color": t.line,
+        color: t.inkSoft,
+      },
     },
     {
-      selector: 'node:selected',
-      style: { 'border-width': 2, 'border-color': t.accent, color: t.ink },
+      selector: "node:selected",
+      style: { "border-width": 2, "border-color": t.accent, color: t.ink },
     },
     {
-      selector: 'node.dimmed',
+      selector: "node.dimmed",
       style: { opacity: 0.25 },
     },
     {
-      selector: 'edge',
+      selector: "edge",
       style: {
         width: 1.2,
-        'line-color': t.muted,
-        'target-arrow-color': t.muted,
-        'target-arrow-shape': 'triangle',
-        'arrow-scale': 0.85,
-        'curve-style': 'bezier',
+        "line-color": t.muted,
+        "target-arrow-color": t.muted,
+        "target-arrow-shape": "triangle",
+        "arrow-scale": 0.85,
+        "curve-style": "bezier",
         opacity: 0.55,
       },
     },
     {
       selector: 'edge[kind = "coreq"]',
-      style: { 'line-style': 'dashed', 'target-arrow-shape': 'none' },
+      style: { "line-style": "dashed", "target-arrow-shape": "none" },
     },
     {
-      selector: 'edge.highlight',
-      style: { width: 2, 'line-color': t.accent, 'target-arrow-color': t.accent, opacity: 1 },
+      selector: "edge.highlight",
+      style: {
+        width: 2,
+        "line-color": t.accent,
+        "target-arrow-color": t.accent,
+        opacity: 1,
+      },
     },
     {
-      selector: 'edge.dimmed',
+      selector: "edge.dimmed",
       style: { opacity: 0.08 },
     },
   ] as cytoscape.StylesheetJson;
@@ -216,8 +235,8 @@ let layout: cytoscape.Layouts | null = null;
 let currentMajor: Major | null = null;
 let membership = new Map<string, Membership>();
 
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const isDesktop = window.matchMedia('(min-width: 1024px)');
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const isDesktop = window.matchMedia("(min-width: 1024px)");
 
 // ------------------------------------------------------------ graph model
 
@@ -230,7 +249,7 @@ function membershipFor(major: Major): Map<string, Membership> {
   for (const level of major.levels) {
     for (const group of level.groups) {
       for (const unit of group.units) {
-        if (group.kind === 'core' || !result.has(unit.code)) {
+        if (group.kind === "core" || !result.has(unit.code)) {
           result.set(unit.code, group.kind);
         }
       }
@@ -250,7 +269,10 @@ function buildElements(major: Major, includeOutside: boolean) {
     for (const code of [...visible]) {
       const unit = units.get(code);
       if (!unit) continue;
-      for (const ref of [...(unit.prereqUnits ?? []), ...(unit.coreqUnits ?? [])]) {
+      for (const ref of [
+        ...(unit.prereqUnits ?? []),
+        ...(unit.coreqUnits ?? []),
+      ]) {
         if (!visible.has(ref) && units.has(ref)) visible.add(ref);
       }
     }
@@ -264,14 +286,14 @@ function buildElements(major: Major, includeOutside: boolean) {
       data: {
         id: code,
         label: `${code}\n${unit.title}`,
-        membership: membership.get(code) ?? 'outside',
+        membership: membership.get(code) ?? "outside",
       },
     });
   }
 
   const edges: cytoscape.ElementDefinition[] = [];
   const seen = new Set<string>();
-  const addEdge = (from: string, to: string, kind: 'prereq' | 'coreq') => {
+  const addEdge = (from: string, to: string, kind: "prereq" | "coreq") => {
     if (!visible.has(from) || !visible.has(to) || from === to) return;
     const id = `${kind}:${from}->${to}`;
     if (seen.has(id)) return;
@@ -282,8 +304,8 @@ function buildElements(major: Major, includeOutside: boolean) {
   for (const code of visible) {
     const unit = units.get(code);
     if (!unit) continue;
-    for (const ref of unit.prereqUnits ?? []) addEdge(ref, code, 'prereq');
-    for (const ref of unit.coreqUnits ?? []) addEdge(ref, code, 'coreq');
+    for (const ref of unit.prereqUnits ?? []) addEdge(ref, code, "prereq");
+    for (const ref of unit.coreqUnits ?? []) addEdge(ref, code, "coreq");
   }
 
   return { nodes, edges, visible };
@@ -299,7 +321,7 @@ function buildElements(major: Major, includeOutside: boolean) {
 function findCycles(edges: cytoscape.ElementDefinition[]): string[] {
   const adjacency = new Map<string, string[]>();
   for (const edge of edges) {
-    if (edge.data.kind !== 'prereq') continue;
+    if (edge.data.kind !== "prereq") continue;
     const from = edge.data.source as string;
     const list = adjacency.get(from) ?? [];
     list.push(edge.data.target as string);
@@ -314,7 +336,7 @@ function findCycles(edges: cytoscape.ElementDefinition[]): string[] {
     for (const next of adjacency.get(node) ?? []) {
       const mark = state.get(next) ?? 0;
       if (mark === 1) {
-        found.push([...path.slice(path.indexOf(next)), next].join(' to '));
+        found.push([...path.slice(path.indexOf(next)), next].join(" to "));
       } else if (mark === 0) {
         walk(next, [...path, next]);
       }
@@ -342,15 +364,15 @@ function mount(container: HTMLElement) {
     boxSelectionEnabled: false,
   });
 
-  cy.on('tap', 'node', (event) => {
+  cy.on("tap", "node", (event) => {
     const code = event.target.id() as string;
     focusUnit(code);
   });
 
-  cy.on('tap', (event) => {
+  cy.on("tap", (event) => {
     if (event.target === cy) {
-      cy?.elements().removeClass('dimmed highlight');
-      cy?.$(':selected').unselect();
+      cy?.elements().removeClass("dimmed highlight");
+      cy?.$(":selected").unselect();
       renderPlaceholder();
     }
   });
@@ -370,9 +392,9 @@ function render() {
   cy.add([...nodes, ...edges]);
 
   layout = cy.layout({
-    name: 'dagre',
+    name: "dagre",
     // @ts-expect-error dagre-specific options are not in the core layout type
-    rankDir: 'TB',
+    rankDir: "TB",
     nodeSep: 26,
     rankSep: 64,
     // dagre's minLen must be at least 1; passing 0 for co-requisites (to keep
@@ -388,8 +410,11 @@ function render() {
 
   // Search suggestions follow whatever is on screen.
   $options.innerHTML = nodes
-    .map((n) => `<option value="${esc(n.data.id as string)}">${esc(units.get(n.data.id as string)?.title ?? '')}</option>`)
-    .join('');
+    .map(
+      (n) =>
+        `<option value="${esc(n.data.id as string)}">${esc(units.get(n.data.id as string)?.title ?? "")}</option>`,
+    )
+    .join("");
 
   const messages: string[] = [];
   if (edges.length === 0) {
@@ -403,7 +428,7 @@ function render() {
       `The handbook lists a circular prerequisite: ${esc(cycles[0])}. The layout still draws it, but that chain cannot be taken in order as written.`,
     );
   }
-  if (messages.length) note('info', messages.join('</p><p class="mt-2">'));
+  if (messages.length) note("info", messages.join('</p><p class="mt-2">'));
   else clearNote();
 
   renderCompact();
@@ -422,7 +447,7 @@ function renderPlaceholder() {
     <p class="meta">Detail</p>
     <p class="mt-3 text-sm text-ink-soft">
       Select a unit to read its prerequisite rule as the handbook words it${
-        count ? `. ${count} units are on screen` : ''
+        count ? `. ${count} units are on screen` : ""
       }.
     </p>`;
 }
@@ -447,7 +472,7 @@ async function loadDetail(code: string): Promise<UnitDetail | null> {
  * Unit codes inside it are jumps to that node rather than links off the site.
  */
 function ruleBlock(label: string, rule: Rule | undefined) {
-  if (!rule?.html) return '';
+  if (!rule?.html) return "";
   return `
     <div class="mt-4">
       <p class="meta">${esc(label)}</p>
@@ -464,27 +489,37 @@ function focusUnit(code: string) {
 
   const node = cy.$id(code);
   if (node.nonempty()) {
-    cy.$(':selected').unselect();
+    cy.$(":selected").unselect();
     node.select();
 
     // Dim everything except this unit's immediate chain, both directions.
     const chain = node.closedNeighborhood();
-    cy.elements().addClass('dimmed');
-    chain.removeClass('dimmed');
-    cy.elements().removeClass('highlight');
-    node.connectedEdges().addClass('highlight').removeClass('dimmed');
+    cy.elements().addClass("dimmed");
+    chain.removeClass("dimmed");
+    cy.elements().removeClass("highlight");
+    node.connectedEdges().addClass("highlight").removeClass("dimmed");
   }
 
   const kind = membership.get(code);
   const badges = [
-    kind === 'core' ? tag('Compulsory', 'var(--tag-core-bg)', 'var(--tag-core-fg)') : '',
-    kind === 'option' ? tag('Option', 'var(--tag-option-bg)', 'var(--tag-option-fg)') : '',
-    kind === undefined ? tag('Outside the major', 'var(--surface-tint)', 'var(--muted)') : '',
-    unit.credits ? tag(`${unit.credits} points`, 'var(--surface-tint)', 'var(--ink-soft)') : '',
-    ...unit.availability.map((a) => tag(a, 'var(--surface-tint)', 'var(--ink-soft)')),
+    kind === "core"
+      ? tag("Compulsory", "var(--tag-core-bg)", "var(--tag-core-fg)")
+      : "",
+    kind === "option"
+      ? tag("Option", "var(--tag-option-bg)", "var(--tag-option-fg)")
+      : "",
+    kind === undefined
+      ? tag("Outside the major", "var(--surface-tint)", "var(--muted)")
+      : "",
+    unit.credits
+      ? tag(`${unit.credits} points`, "var(--surface-tint)", "var(--ink-soft)")
+      : "",
+    ...unit.availability.map((a) =>
+      tag(a, "var(--surface-tint)", "var(--ink-soft)"),
+    ),
   ]
     .filter(Boolean)
-    .join('');
+    .join("");
 
   const dependents = [...units.values()]
     .filter((u) => (u.prereqUnits ?? []).includes(code))
@@ -496,22 +531,22 @@ function focusUnit(code: string) {
     <h2 class="display mt-1 text-xl">${esc(unit.title)}</h2>
     <div class="mt-3 flex flex-wrap gap-1.5">${badges}</div>
 
-    ${ruleBlock('Prerequisites', unit.rules?.prerequisites)}
-    ${ruleBlock('Co-requisites', unit.rules?.corequisites)}
-    ${ruleBlock('Advisable prior study', unit.rules?.advisable)}
-    ${ruleBlock('Incompatible with', unit.rules?.incompatibility)}
-    ${ruleBlock('Approved quota', unit.rules?.quota)}
+    ${ruleBlock("Prerequisites", unit.rules?.prerequisites)}
+    ${ruleBlock("Co-requisites", unit.rules?.corequisites)}
+    ${ruleBlock("Advisable prior study", unit.rules?.advisable)}
+    ${ruleBlock("Incompatible with", unit.rules?.incompatibility)}
+    ${ruleBlock("Approved quota", unit.rules?.quota)}
     ${
       unit.rules?.prerequisites
-        ? ''
+        ? ""
         : '<p class="mt-4 text-sm text-ink-soft">The handbook lists no prerequisites for this unit.</p>'
     }
 
     ${
       dependents.length
         ? `<div class="mt-4"><p class="meta">Leads to (${dependents.length})</p>
-           <p class="mt-1.5 font-mono text-xs leading-relaxed text-ink-soft">${dependents.map(esc).join(', ')}</p></div>`
-        : ''
+           <p class="mt-1.5 font-mono text-xs leading-relaxed text-ink-soft">${dependents.map(esc).join(", ")}</p></div>`
+        : ""
     }
 
     <div id="detail-prose" class="mt-4"></div>
@@ -523,16 +558,16 @@ function focusUnit(code: string) {
 
   // Unit codes inside a rule navigate within the graph. They are rendered from
   // handbook markup as plain <a> with no href, so they need explicit roles.
-  $detail.querySelectorAll<HTMLElement>('[data-unit]').forEach((link) => {
+  $detail.querySelectorAll<HTMLElement>("[data-unit]").forEach((link) => {
     const target = link.dataset.unit;
     if (!target || !units.has(target)) return;
-    link.setAttribute('role', 'button');
-    link.setAttribute('tabindex', '0');
+    link.setAttribute("role", "button");
+    link.setAttribute("tabindex", "0");
     link.title = `Show ${target}`;
     const go = () => focusUnit(target);
-    link.addEventListener('click', go);
-    link.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
+    link.addEventListener("click", go);
+    link.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         go();
       }
@@ -540,7 +575,7 @@ function focusUnit(code: string) {
   });
 
   void loadDetail(code).then((detail) => {
-    const host = document.getElementById('detail-prose');
+    const host = document.getElementById("detail-prose");
     if (!host || !detail?.description) return;
     host.innerHTML = `<p class="meta">Description</p>
       <div class="mt-1.5 text-sm leading-relaxed text-ink-soft">${detail.description}</div>`;
@@ -563,33 +598,33 @@ function renderCompact() {
               return `
                 <li class="rounded-[var(--radius-control)] border border-line bg-canvas p-3">
                   <p class="font-mono text-xs text-ink">${esc(entry.code)}</p>
-                  <p class="mt-0.5 text-sm text-ink">${esc(unit?.title ?? '')}</p>
+                  <p class="mt-0.5 text-sm text-ink">${esc(unit?.title ?? "")}</p>
                   <p class="mt-1.5 text-xs text-ink-soft">${
                     prereq.length
-                      ? `Needs ${prereq.map(esc).join(', ')}`
-                      : 'No unit prerequisites listed'
+                      ? `Needs ${prereq.map(esc).join(", ")}`
+                      : "No unit prerequisites listed"
                   }</p>
                 </li>`;
             })
-            .join('');
+            .join("");
 
           const badge =
-            group.kind === 'core'
-              ? tag('Compulsory', 'var(--tag-core-bg)', 'var(--tag-core-fg)')
-              : tag('Option', 'var(--tag-option-bg)', 'var(--tag-option-fg)');
+            group.kind === "core"
+              ? tag("Compulsory", "var(--tag-core-bg)", "var(--tag-core-fg)")
+              : tag("Option", "var(--tag-option-bg)", "var(--tag-option-fg)");
 
           return `<div class="mt-4">
               <div class="flex flex-wrap items-center gap-2">${badge}<span class="meta">${esc(group.take)}</span></div>
               <ul class="mt-2 grid gap-2 sm:grid-cols-2">${rows}</ul>
             </div>`;
         })
-        .join('');
+        .join("");
 
       return `<section class="rounded-[var(--radius-card)] border border-line bg-surface p-4">
           <h2 class="display text-lg">${esc(level.level)}</h2>${groups}
         </section>`;
     })
-    .join('');
+    .join("");
 }
 
 // ------------------------------------------------------------- selection
@@ -598,32 +633,34 @@ function selectMajor(code: string) {
   const major = majors.find((m) => m.code === code);
   if (!major) return;
 
-  if (major.kind === 'disambiguation') {
+  if (major.kind === "disambiguation") {
     currentMajor = null;
     layout?.stop();
     cy?.elements().remove();
-    $workspace.classList.add('hidden');
-    $compact.classList.add('hidden');
+    $workspace.classList.add("hidden");
+    $compact.classList.add("hidden");
     renderPlaceholder();
     const links = major.variants
       .map((v) => {
         const target = majors.find((m) => m.code === v);
         return target
           ? `<button type="button" data-major="${esc(v)}" class="rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-1.5 text-sm text-ink transition-colors hover:bg-surface-tint">${esc(target.name)} <span class="font-mono text-xs text-muted">${esc(v)}</span></button>`
-          : '';
+          : "";
       })
       .filter(Boolean)
-      .join('');
+      .join("");
     note(
-      'info',
+      "info",
       `<strong class="font-medium text-ink">${esc(major.name)} is split into separate majors</strong> depending on how much you have already studied. Pick the one that applies:<div class="mt-3 flex flex-wrap gap-2">${links}</div>`,
     );
-    $status.querySelectorAll<HTMLButtonElement>('[data-major]').forEach((button) => {
-      button.addEventListener('click', () => {
-        $major.value = button.dataset.major ?? '';
-        selectMajor($major.value);
+    $status
+      .querySelectorAll<HTMLButtonElement>("[data-major]")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          $major.value = button.dataset.major ?? "";
+          selectMajor($major.value);
+        });
       });
-    });
     return;
   }
 
@@ -636,14 +673,14 @@ function selectMajor(code: string) {
 function applyBreakpoint() {
   if (!currentMajor) return;
   if (isDesktop.matches) {
-    $workspace.classList.remove('hidden');
-    $compact.classList.add('hidden');
-    $overlay.classList.add('hidden');
-    $overlay.classList.remove('flex');
-    if (!cy || cy.container() !== el('cy')) mount(el('cy'));
+    $workspace.classList.remove("hidden");
+    $compact.classList.add("hidden");
+    $overlay.classList.add("hidden");
+    $overlay.classList.remove("flex");
+    if (!cy || cy.container() !== el("cy")) mount(el("cy"));
   } else {
-    $workspace.classList.add('hidden');
-    $compact.classList.remove('hidden');
+    $workspace.classList.add("hidden");
+    $compact.classList.remove("hidden");
   }
 }
 
@@ -665,7 +702,7 @@ async function main() {
     majorData = await m.json();
   } catch (error) {
     note(
-      'error',
+      "error",
       `<strong class="font-medium text-ink">The handbook data did not load.</strong> ${esc(
         String(error),
       )}. Reload the page, or read the units directly at <a class="text-accent underline underline-offset-2" href="${HANDBOOK}">handbooks.uwa.edu.au</a>.`,
@@ -679,53 +716,59 @@ async function main() {
   $provenance.textContent = `Handbook ${graphData.year}, read on ${graphData.scrapedAt}.`;
 
   $major.innerHTML = majors
-    .map((m) => `<option value="${esc(m.code)}">${esc(m.name || m.code)}</option>`)
-    .join('');
+    .map(
+      (m) => `<option value="${esc(m.code)}">${esc(m.name || m.code)}</option>`,
+    )
+    .join("");
 
-  const preferred = majors.find((m) => m.code === 'MJD-CMPSC') ?? majors.find((m) => m.kind === 'major');
+  const preferred =
+    majors.find((m) => m.code === "MJD-CMPSC") ??
+    majors.find((m) => m.kind === "major");
   if (!preferred) {
-    note('error', 'No majors were found in the data file. Re-run the scraper.');
+    note("error", "No majors were found in the data file. Re-run the scraper.");
     return;
   }
 
   $major.value = preferred.code;
-  mount(el('cy'));
+  mount(el("cy"));
   selectMajor(preferred.code);
 
   // Events
-  $major.addEventListener('change', () => selectMajor($major.value));
-  $outside.addEventListener('change', () => render());
+  $major.addEventListener("change", () => selectMajor($major.value));
+  $outside.addEventListener("change", () => render());
 
-  $search.addEventListener('change', () => {
+  $search.addEventListener("change", () => {
     const code = $search.value.trim().toUpperCase();
     if (units.has(code)) focusUnit(code);
   });
 
-  el<HTMLButtonElement>('fit').addEventListener('click', () => {
+  el<HTMLButtonElement>("fit").addEventListener("click", () => {
     cy?.fit(undefined, 28);
   });
 
-  el<HTMLButtonElement>('open-graph').addEventListener('click', () => {
-    $overlay.classList.remove('hidden');
-    $overlay.classList.add('flex');
-    mount(el('cy-mobile'));
+  el<HTMLButtonElement>("open-graph").addEventListener("click", () => {
+    $overlay.classList.remove("hidden");
+    $overlay.classList.add("flex");
+    mount(el("cy-mobile"));
     render();
   });
 
-  el<HTMLButtonElement>('close-graph').addEventListener('click', () => {
-    $overlay.classList.add('hidden');
-    $overlay.classList.remove('flex');
+  el<HTMLButtonElement>("close-graph").addEventListener("click", () => {
+    $overlay.classList.add("hidden");
+    $overlay.classList.remove("flex");
   });
 
-  isDesktop.addEventListener('change', () => {
+  isDesktop.addEventListener("change", () => {
     applyBreakpoint();
     if (isDesktop.matches) render();
   });
 
   // Re-read tokens when the colour scheme flips; the canvas cannot inherit them.
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    requestAnimationFrame(() => cy?.style(stylesheet(tokens())));
-  });
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", () => {
+      requestAnimationFrame(() => cy?.style(stylesheet(tokens())));
+    });
 }
 
 void main();

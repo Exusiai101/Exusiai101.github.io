@@ -1,8 +1,8 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
-@import '@fontsource-variable/newsreader';
-@import '@fontsource-variable/geist';
-@import '@fontsource-variable/geist-mono';
+@import "@fontsource-variable/newsreader";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 
 /*
   Palette: warm monochrome canvas, one accent (muted ink blue) used across the
@@ -75,9 +75,9 @@
   --color-tag-warn-bg: var(--tag-warn-bg);
   --color-tag-warn-fg: var(--tag-warn-fg);
 
-  --font-sans: 'Geist Variable', 'SF Pro Text', 'Helvetica Neue', sans-serif;
-  --font-serif: 'Newsreader Variable', 'Lyon Text', Georgia, serif;
-  --font-mono: 'Geist Mono Variable', 'SF Mono', monospace;
+  --font-sans: "Geist Variable", "SF Pro Text", "Helvetica Neue", sans-serif;
+  --font-serif: "Newsreader Variable", "Lyon Text", Georgia, serif;
+  --font-mono: "Geist Mono Variable", "SF Mono", monospace;
 
   /* Radius system: cards 12px, controls 6px, tags pill. Nothing else. */
   --radius-card: 12px;
@@ -160,7 +160,15 @@ body {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(60rem 40rem at 78% -10%, var(--accent-soft), transparent 70%),
-    radial-gradient(50rem 30rem at 5% 5%, rgba(120, 120, 122, 0.05), transparent 70%);
+    radial-gradient(
+      60rem 40rem at 78% -10%,
+      var(--accent-soft),
+      transparent 70%
+    ),
+    radial-gradient(
+      50rem 30rem at 5% 5%,
+      rgba(120, 120, 122, 0.05),
+      transparent 70%
+    );
   opacity: 0.7;
 }

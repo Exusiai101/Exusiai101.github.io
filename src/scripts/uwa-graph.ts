@@ -19,6 +19,23 @@ interface Rule {
 type RuleKind =
   "prerequisites" | "corequisites" | "incompatibility" | "advisable" | "quota";
 
+/**
+ * A part of a prerequisite rule that names no unit code, classified by
+ * scripts/handbook/requirements.mjs. Only "unit-set" is a dependency on other
+ * units and can be drawn; the rest are gates the graph has no way to express.
+ */
+interface GenericPrereq {
+  kind: "unit-set" | "points" | "enrolment" | "external" | "other";
+  levels?: number[];
+  subjects?: string[];
+  majors?: string[];
+  schools?: string[];
+  quantity?: { points?: number; units?: number };
+  /** "or equivalent" and friends: the rule is wider than any unit list. */
+  hedge?: boolean;
+  text: string;
+}
+
 interface Unit {
   code: string;
   title: string;
@@ -33,6 +50,7 @@ interface Unit {
   coreqUnits?: string[];
   incompatibleUnits?: string[];
   advisableUnits?: string[];
+  genericPrereqs?: GenericPrereq[];
 }
 
 interface MajorGroup {
@@ -82,6 +100,7 @@ const $search = el<HTMLInputElement>("unit-search");
 const $options = el<HTMLDataListElement>("unit-options");
 const $outside = el<HTMLInputElement>("include-outside");
 const $advisable = el<HTMLInputElement>("include-advisable");
+const $generic = el<HTMLInputElement>("include-generic");
 const $overlay = el<HTMLDivElement>("overlay");
 const $provenance = el<HTMLSpanElement>("provenance");
 
@@ -260,6 +279,33 @@ function stylesheet(
         color: t.inkSoft,
       },
     },
+    // Not a unit: a choice the handbook worded as "any Level 2 ANTH unit".
+    // Shares the demoted fill with units outside the major, because both mean
+    // "not part of the major proper"; the rounder corners and the dashed edge
+    // are what separate them.
+    {
+      selector: 'node[type = "requirement"]',
+      style: {
+        "corner-radius": 16,
+        width: compact ? 76 : 124,
+        height: compact ? 30 : 44,
+        "background-color": t.surfaceTint,
+        "border-style": "dashed",
+        "border-color": t.muted,
+        color: t.inkSoft,
+        "font-family": "Geist Variable, sans-serif",
+        "font-size": compact ? 9 : 10,
+        "text-max-width": compact ? "68px" : "108px",
+      },
+    },
+    // A unit whose rule gates on something no arrow can carry - a points
+    // total, enrolment in a course - is not a starting point, even though
+    // nothing points at it. Must sit after the membership rules to win over
+    // their border colour.
+    {
+      selector: 'node[generic = "unmet"]',
+      style: { "border-style": "dashed", "border-color": t.muted },
+    },
     {
       selector: "node:selected",
       style: { "border-width": 2, "border-color": t.accent, color: t.ink },
@@ -296,6 +342,21 @@ function stylesheet(
         opacity: 0.35,
       },
     },
+    // Taxi routing rather than bezier: up to twenty of these converge on one
+    // box, and curves at that fan-in read as a bundle instead of a funnel.
+    {
+      selector: 'edge[kind = "requirement"]',
+      style: {
+        "curve-style": "taxi",
+        "taxi-direction": "auto",
+        "line-style": "dashed",
+        "line-dash-pattern": [3, 3],
+        "line-color": t.muted,
+        "target-arrow-color": t.muted,
+        "arrow-scale": 0.7,
+        opacity: 0.4,
+      },
+    },
     {
       selector: "edge.highlight",
       style: {
@@ -322,6 +383,12 @@ let cy: cytoscape.Core | null = null;
 let currentMajor: Major | null = null;
 let membership = new Map<string, Membership>();
 
+/** What each drawn requirement node stands for; rebuilt by every render(). */
+let requirementNodes = new Map<
+  string,
+  { req: GenericPrereq; matches: string[]; dependents: string[] }
+>();
+
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const isDesktop = window.matchMedia("(min-width: 1024px)");
 
@@ -345,10 +412,134 @@ function membershipFor(major: Major): Map<string, Membership> {
   return result;
 }
 
+/**
+ * Units in this major that would satisfy a generic requirement.
+ *
+ * "Any Level 2 ANTH unit" means any such unit in the university, but a student
+ * reading their own major wants the ones in front of them, and resolving
+ * university-wide would draw a hundred boxes nobody is taking. The narrowing
+ * is deliberate, and the detail panel says so in as many words.
+ *
+ * Scoped to the major's own units rather than the one-hop `visible` set, so a
+ * prerequisite pulled in from outside cannot drift into the choice.
+ */
+function resolveRequirement(req: GenericPrereq, dependent: string): string[] {
+  const matches: string[] = [];
+  for (const code of membership.keys()) {
+    if (code === dependent) continue;
+    const unit = units.get(code);
+    if (!unit) continue;
+    if (req.levels?.length && !req.levels.includes(unit.level ?? -1)) continue;
+
+    if (req.subjects?.length) {
+      if (!req.subjects.includes(code.slice(0, 4))) continue;
+    } else if (req.majors?.length) {
+      if (!req.majors.some((name) => majorUnits(name).has(code))) continue;
+    } else if (req.schools?.length) {
+      if (!req.schools.includes(unit.school)) continue;
+    }
+    matches.push(code);
+  }
+  return matches.sort();
+}
+
+/** Unit codes of a major, addressed by either its code or its name. */
+function majorUnits(nameOrCode: string): Set<string> {
+  const key = nameOrCode.toLowerCase();
+  const major = majors.find(
+    (m) => m.code.toLowerCase() === key || m.name.toLowerCase() === key,
+  );
+  if (!major) return new Set();
+  return new Set(membershipFor(major).keys());
+}
+
+/**
+ * Is `to` already downstream of `from`? Requirement nodes are shared, so two
+ * level 2 units that each ask for "any level 2 unit" would otherwise point at
+ * each other through their respective funnels and make a cycle out of nothing
+ * the handbook said.
+ */
+function reachable(
+  from: string,
+  to: string,
+  edges: cytoscape.ElementDefinition[],
+): boolean {
+  const out = new Map<string, string[]>();
+  for (const edge of edges) {
+    const source = edge.data.source as string;
+    out.set(source, [...(out.get(source) ?? []), edge.data.target as string]);
+  }
+  const seen = new Set([from]);
+  const stack = [from];
+  while (stack.length) {
+    const node = stack.pop()!;
+    if (node === to) return true;
+    for (const next of out.get(node) ?? []) {
+      if (!seen.has(next)) {
+        seen.add(next);
+        stack.push(next);
+      }
+    }
+  }
+  return false;
+}
+
+/** Stable id for a requirement node, keyed by what it resolved to. */
+function requirementId(req: GenericPrereq, matches: string[]): string {
+  const scope =
+    req.subjects?.join(".") ||
+    req.majors?.join(".") ||
+    req.schools?.join(".") ||
+    "any";
+  const quantity = req.quantity?.points
+    ? `${req.quantity.points}p`
+    : req.quantity?.units
+      ? `${req.quantity.units}u`
+      : "";
+  // Real ids are always four letters and four digits, so this cannot collide.
+  // The match list is part of the key on purpose: it is what stops a unit's
+  // own funnel, which excludes it, being shared with a sibling's.
+  return `req:${req.levels?.join("/") ?? "any"}|${scope}|${quantity}:${matches.join(",")}`;
+}
+
+/** "Any two Level 2 ANTH, ASIA or GEND units", built from the structure. */
+function requirementPhrase(req: GenericPrereq): string {
+  const count = req.quantity?.points
+    ? `${req.quantity.points} points of`
+    : req.quantity?.units === 2
+      ? "Any two"
+      : req.quantity?.units === 3
+        ? "Any three"
+        : "Any";
+  const levels = req.levels?.length
+    ? `Level ${req.levels.join(" or ")}`
+    : "any level";
+  const scope = req.subjects?.length
+    ? listSentence(req.subjects)
+    : req.majors?.length
+      ? `${listSentence(req.majors.map(prettyMajor))} major`
+      : req.schools?.length
+        ? listSentence(req.schools)
+        : "";
+  const plural = req.quantity?.points || (req.quantity?.units ?? 1) > 1;
+  return `${count} ${levels}${scope ? ` ${scope}` : ""} unit${plural ? "s" : ""}${
+    req.hedge ? ", or equivalent" : ""
+  }`;
+}
+
+const listSentence = (items: string[]) =>
+  items.length < 2
+    ? (items[0] ?? "")
+    : `${items.slice(0, -1).join(", ")} or ${items[items.length - 1]}`;
+
+const prettyMajor = (name: string) =>
+  majors.find((m) => m.code === name)?.name.replace(/\s*\[.*\]$/, "") ?? name;
+
 function buildElements(
   major: Major,
   includeOutside: boolean,
   includeAdvisable: boolean,
+  includeGeneric: boolean,
 ) {
   membership = membershipFor(major);
   const visible = new Set(membership.keys());
@@ -419,7 +610,80 @@ function buildElements(
     }
   }
 
-  return { nodes, edges, visible };
+  // Requirements that name no unit code.
+  //
+  // A "unit-set" is a real dependency and gets drawn: the units in this major
+  // that satisfy it feed one shared box, which then feeds the dependent. The
+  // funnel is the point - arrows straight from all five would read as "you
+  // need all five" when the handbook said "any one of".
+  //
+  // Everything else (a points total, enrolment in a course, an ATAR subject)
+  // is a gate no arrow can express. Those only mark the node, so that a unit
+  // with nothing pointing at it is not mistaken for a place to start.
+  requirementNodes = new Map();
+  const unmet = new Set<string>();
+  const reqNodes: cytoscape.ElementDefinition[] = [];
+  const reqEdges: cytoscape.ElementDefinition[] = [];
+
+  for (const code of visible) {
+    const unit = units.get(code);
+    if (!unit?.genericPrereqs?.length) continue;
+    for (const req of unit.genericPrereqs) {
+      if (req.kind !== "unit-set" || !includeGeneric || !membership.has(code)) {
+        unmet.add(code);
+        continue;
+      }
+      const matches = resolveRequirement(req, code).filter(
+        (match) => !reachable(code, match, [...edges, ...reqEdges]),
+      );
+      if (!matches.length) {
+        unmet.add(code);
+        continue;
+      }
+
+      const id = requirementId(req, matches);
+      if (!requirementNodes.has(id)) {
+        requirementNodes.set(id, { req, matches, dependents: [] });
+        reqNodes.push({
+          data: {
+            id,
+            type: "requirement",
+            code: `${req.levels?.length ? `L${req.levels.join("/")}` : "Any"} ×${matches.length}`,
+            label: `${requirementPhrase(req)}\n${matches.length} in this major`,
+          },
+        });
+        for (const match of matches) {
+          reqEdges.push({
+            data: {
+              id: `req:${match}->${id}`,
+              source: match,
+              target: id,
+              kind: "requirement",
+            },
+          });
+        }
+      }
+      requirementNodes.get(id)!.dependents.push(code);
+      reqEdges.push({
+        data: {
+          id: `req:${id}->${code}`,
+          source: id,
+          target: code,
+          kind: "requirement",
+        },
+      });
+    }
+  }
+
+  for (const node of nodes) {
+    if (unmet.has(node.data.id as string)) node.data.generic = "unmet";
+  }
+
+  return {
+    nodes: [...nodes, ...reqNodes],
+    edges: [...edges, ...reqEdges],
+    visible,
+  };
 }
 
 /**
@@ -648,14 +912,17 @@ function render() {
     currentMajor,
     $outside.checked,
     $advisable.checked,
+    $generic.checked,
   );
 
   cy.elements().remove();
   cy.add([...nodes, ...edges]);
   runLayout();
 
-  // Search suggestions follow whatever is on screen.
+  // Search suggestions follow whatever is on screen. Requirement nodes are not
+  // units and have nothing to search for.
   $options.innerHTML = nodes
+    .filter((n) => !n.data.type)
     .map(
       (n) =>
         `<option value="${esc(n.data.id as string)}">${esc(units.get(n.data.id as string)?.title ?? "")}</option>`,
@@ -663,7 +930,7 @@ function render() {
     .join("");
 
   const messages: string[] = [];
-  if (edges.length === 0) {
+  if (!edges.some((e) => e.data.kind !== "requirement")) {
     messages.push(
       `<strong class="font-medium text-ink">No prerequisite links to draw.</strong> The units in ${esc(currentMajor.name)} do not list each other as prerequisites. That is common: many majors gate on course enrolment or ATAR subjects rather than on other units. Select any unit to read its actual rule.`,
     );
@@ -687,8 +954,56 @@ function tag(text: string, bg: string, fg: string) {
   return `<span class="tag" style="background:${bg};color:${fg}">${esc(text)}</span>`;
 }
 
+/** Short label for a requirement no arrow can carry. */
+function genericChipText(req: GenericPrereq): string {
+  if (req.kind === "unit-set") return requirementPhrase(req);
+  if (req.kind === "points") {
+    const points = /\b(\d+)\s*(?:credit\s*)?points?\b/i.exec(req.text)?.[1];
+    return points ? `${points} points completed` : "A points total";
+  }
+  if (req.kind === "enrolment") return `Enrolled in ${req.text}`;
+  return req.text;
+}
+
+const CHIP_COLOURS: Record<GenericPrereq["kind"], [string, string]> = {
+  "unit-set": ["var(--tag-option-bg)", "var(--tag-option-fg)"],
+  points: ["var(--surface-tint)", "var(--ink-soft)"],
+  enrolment: ["var(--surface-tint)", "var(--ink-soft)"],
+  // Outside anything the handbook models as a unit: an ATAR subject, an
+  // audition, a coordinator's approval.
+  external: ["var(--tag-warn-bg)", "var(--tag-warn-fg)"],
+  other: ["var(--surface-tint)", "var(--muted)"],
+};
+
+/**
+ * The parts of a prerequisite rule that name no unit, as chips above the
+ * verbatim rule. The rule itself stays directly beneath them and remains the
+ * authority; these only say what the arrows could not.
+ */
+function genericChips(reqs: GenericPrereq[] | undefined): string {
+  if (!reqs?.length) return "";
+  const chips = reqs
+    .map((req) => {
+      const [bg, fg] = CHIP_COLOURS[req.kind];
+      const text = genericChipText(req);
+      return tag(text.length > 90 ? `${text.slice(0, 87)}...` : text, bg, fg);
+    })
+    .join("");
+  return `
+    <div class="mt-4">
+      <p class="meta">Also required</p>
+      <div class="mt-1.5 flex flex-wrap gap-1.5">${chips}</div>
+      <p class="mt-2 text-xs text-muted">
+        These parts of the rule do not name specific units, so no arrow can be
+        drawn for them.
+      </p>
+    </div>`;
+}
+
 function renderPlaceholder() {
-  const count = cy?.nodes().length ?? 0;
+  // "[^type]" is cytoscape for "attribute absent": requirement nodes are not
+  // units and must not inflate the count.
+  const count = cy?.nodes("[^type]").length ?? 0;
   $detail.innerHTML = `
     <p class="meta">Detail</p>
     <p class="mt-3 text-sm text-ink-soft">
@@ -729,31 +1044,129 @@ function ruleBlock(label: string, rule: Rule | undefined) {
     </div>`;
 }
 
+/** Select a node, dim everything that is not on its immediate chain. */
+function spotlight(id: string) {
+  if (!cy) return;
+  const node = cy.$id(id);
+  if (node.empty()) return;
+
+  cy.$(":selected").unselect();
+  node.select();
+
+  // Dim everything except this node's immediate chain, both directions.
+  const chain = node.closedNeighborhood();
+  cy.elements().addClass("dimmed");
+  chain.removeClass("dimmed");
+  cy.elements().removeClass("highlight");
+  node.connectedEdges().addClass("highlight").removeClass("dimmed");
+
+  // Reaching a unit through the search box or through a code inside a rule
+  // can point at a node that is off screen, which looks like nothing happened.
+  const view = cy.extent();
+  const at = node.position();
+  if (at.x < view.x1 || at.x > view.x2 || at.y < view.y1 || at.y > view.y2) {
+    if (reducedMotion.matches) cy.center(node);
+    else cy.animate({ center: { eles: node } }, { duration: 200 });
+  }
+}
+
+/** Turn every [data-unit] marker in the panel into a jump to that node. */
+function wireUnitLinks() {
+  $detail.querySelectorAll<HTMLElement>("[data-unit]").forEach((link) => {
+    const target = link.dataset.unit;
+    if (!target || !units.has(target)) return;
+    link.setAttribute("role", "button");
+    link.setAttribute("tabindex", "0");
+    link.title = `Show ${target}`;
+    const go = () => focusUnit(target);
+    link.addEventListener("click", go);
+    link.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        go();
+      }
+    });
+  });
+}
+
+/**
+ * The panel for a requirement node. Not a unit, so it deliberately skips
+ * loadDetail(): "req:".slice(0, 4) would ask the server for details/req:.json.
+ */
+function focusRequirement(id: string) {
+  const entry = requirementNodes.get(id);
+  // render() rebuilds the map, so a panel left open across a major change can
+  // be holding an id that no longer stands for anything.
+  if (!entry || !cy) return renderPlaceholder();
+
+  spotlight(id);
+
+  const { req, matches, dependents } = entry;
+  const badges = [
+    tag("Requirement", "var(--surface-tint)", "var(--ink-soft)"),
+    req.levels?.length
+      ? tag(
+          `Level ${req.levels.join(" or ")}`,
+          "var(--surface-tint)",
+          "var(--ink-soft)",
+        )
+      : "",
+    ...(req.subjects ?? []).map((s) =>
+      tag(s, "var(--tag-option-bg)", "var(--tag-option-fg)"),
+    ),
+  ]
+    .filter(Boolean)
+    .join("");
+
+  const codeList = (codes: string[]) =>
+    codes
+      .map(
+        (code) =>
+          `<a data-unit="${esc(code)}">${esc(code)}</a>`,
+      )
+      .join(", ");
+
+  $detail.innerHTML = `
+    <p class="meta">Requirement</p>
+    <h2 class="display mt-1 text-xl">${esc(requirementPhrase(req))}</h2>
+    <div class="mt-3 flex flex-wrap gap-1.5">${badges}</div>
+
+    <div class="mt-4">
+      <p class="meta">As the handbook words it</p>
+      <p class="mt-1.5 text-sm leading-relaxed text-ink-soft">${esc(req.text)}</p>
+    </div>
+
+    <div class="mt-4">
+      <p class="meta">Satisfied by (${matches.length})</p>
+      <p class="mt-1.5 text-sm text-ink-soft">
+        <strong class="font-medium text-ink">Any one of these is enough</strong>
+        &mdash; these are the units in this major that would satisfy it, not the
+        whole list the handbook would accept.
+      </p>
+      <p class="mt-1.5 font-mono text-xs leading-relaxed
+                [&_[data-unit]]:cursor-pointer [&_[data-unit]]:text-accent
+                [&_[data-unit]]:underline [&_[data-unit]]:underline-offset-2">${codeList(matches)}</p>
+    </div>
+
+    ${
+      dependents.length
+        ? `<div class="mt-4"><p class="meta">Required by (${dependents.length})</p>
+           <p class="mt-1.5 font-mono text-xs leading-relaxed
+                     [&_[data-unit]]:cursor-pointer [&_[data-unit]]:text-accent
+                     [&_[data-unit]]:underline [&_[data-unit]]:underline-offset-2">${codeList(dependents)}</p></div>`
+        : ""
+    }`;
+
+  wireUnitLinks();
+}
+
 function focusUnit(code: string) {
+  if (code.startsWith("req:")) return focusRequirement(code);
+
   const unit = units.get(code);
   if (!unit || !cy) return;
 
-  const node = cy.$id(code);
-  if (node.nonempty()) {
-    cy.$(":selected").unselect();
-    node.select();
-
-    // Dim everything except this unit's immediate chain, both directions.
-    const chain = node.closedNeighborhood();
-    cy.elements().addClass("dimmed");
-    chain.removeClass("dimmed");
-    cy.elements().removeClass("highlight");
-    node.connectedEdges().addClass("highlight").removeClass("dimmed");
-
-    // Reaching a unit through the search box or through a code inside a rule
-    // can point at a node that is off screen, which looks like nothing happened.
-    const view = cy.extent();
-    const at = node.position();
-    if (at.x < view.x1 || at.x > view.x2 || at.y < view.y1 || at.y > view.y2) {
-      if (reducedMotion.matches) cy.center(node);
-      else cy.animate({ center: { eles: node } }, { duration: 200 });
-    }
-  }
+  spotlight(code);
 
   const kind = membership.get(code);
   const badges = [
@@ -786,6 +1199,7 @@ function focusUnit(code: string) {
     <h2 class="display mt-1 text-xl">${esc(unit.title)}</h2>
     <div class="mt-3 flex flex-wrap gap-1.5">${badges}</div>
 
+    ${genericChips(unit.genericPrereqs)}
     ${ruleBlock("Prerequisites", unit.rules?.prerequisites)}
     ${ruleBlock("Co-requisites", unit.rules?.corequisites)}
     ${ruleBlock("Advisable prior study", unit.rules?.advisable)}
@@ -813,21 +1227,7 @@ function focusUnit(code: string) {
 
   // Unit codes inside a rule navigate within the graph. They are rendered from
   // handbook markup as plain <a> with no href, so they need explicit roles.
-  $detail.querySelectorAll<HTMLElement>("[data-unit]").forEach((link) => {
-    const target = link.dataset.unit;
-    if (!target || !units.has(target)) return;
-    link.setAttribute("role", "button");
-    link.setAttribute("tabindex", "0");
-    link.title = `Show ${target}`;
-    const go = () => focusUnit(target);
-    link.addEventListener("click", go);
-    link.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        go();
-      }
-    });
-  });
+  wireUnitLinks();
 
   void loadDetail(code).then((detail) => {
     const host = document.getElementById("detail-prose");
@@ -863,6 +1263,16 @@ function renderCompact() {
                   ${
                     advisable.length
                       ? `<p class="mt-1 text-xs text-muted">Advisable first: ${advisable.map(esc).join(", ")}</p>`
+                      : ""
+                  }
+                  ${
+                    // This list is built from the major, not from the graph, so
+                    // it cannot show funnels; the full-screen overlay runs the
+                    // real graph and does. Same wording as the panel chips.
+                    unit?.genericPrereqs?.length
+                      ? `<p class="mt-1 text-xs text-muted">Also: ${unit.genericPrereqs
+                          .map((req) => esc(genericChipText(req)))
+                          .join("; ")}</p>`
                       : ""
                   }
                 </li>`;
@@ -1028,6 +1438,7 @@ async function main() {
   $major.addEventListener("change", () => selectMajor($major.value));
   $outside.addEventListener("change", () => render());
   $advisable.addEventListener("change", () => render());
+  $generic.addEventListener("change", () => render());
 
   $search.addEventListener("change", () => {
     const code = $search.value.trim().toUpperCase();

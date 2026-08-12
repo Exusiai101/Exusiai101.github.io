@@ -46,6 +46,17 @@ const base = import.meta.env.BASE_URL;
           can enrol without them. Select any unit to read the rule exactly as the handbook
           words it, and treat the handbook as authoritative.
         </p>
+        <p class="mt-2 border-l border-line pl-4 text-sm leading-relaxed text-ink-soft">
+          Many rules never name a unit at all: they gate on enrolment in a course, on a
+          points total, or on "any Level 2 unit". Those units are not really starting
+          points even though nothing points at them, so they are drawn with a dashed
+          border, and the parts of the rule that could not become an arrow are listed as
+          chips in the detail panel. Where a rule asks for a level-and-subject group, the
+          units in this major that would satisfy it feed into a rounded box &mdash;
+          <strong class="font-medium text-ink">
+            any one of them is enough, not all of them.
+          </strong>
+        </p>
       </details>
     </header>
 
@@ -86,7 +97,7 @@ const base = import.meta.env.BASE_URL;
           <datalist id="unit-options"></datalist>
         </div>
 
-        <div class="grid gap-2 sm:grid-cols-2 md:col-span-2">
+        <div class="grid gap-2 sm:grid-cols-3 md:col-span-2">
           <label
             class="flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-2 text-sm text-ink-soft"
           >
@@ -99,6 +110,13 @@ const base = import.meta.env.BASE_URL;
           >
             <input id="include-advisable" type="checkbox" checked class="accent-accent" />
             Show advisable prior study
+          </label>
+
+          <label
+            class="flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-2 text-sm text-ink-soft"
+          >
+            <input id="include-generic" type="checkbox" checked class="accent-accent" />
+            Show "any Level N unit" rules
           </label>
         </div>
       </div>
@@ -113,8 +131,17 @@ const base = import.meta.env.BASE_URL;
         <span class="tag" style="background:var(--surface-tint);color:var(--muted)">
           Outside the major
         </span>
+        <span
+          class="tag"
+          style="background:var(--surface-tint);color:var(--ink-soft);border:1px dashed var(--muted)"
+        >
+          Choose any one
+        </span>
         <span class="meta">
           Solid arrow: prerequisite. Dashed: co-requisite. Dotted: advisable prior study.
+          Grey dashes into a rounded box: a choice, where any one of the units feeding it
+          satisfies the rule. A dashed unit border means part of that unit's rule could
+          not be drawn.
         </span>
       </div>
     </section>

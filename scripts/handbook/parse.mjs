@@ -16,6 +16,7 @@ import { mkdir, writeFile, readFile, readdir } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as cheerio from "cheerio";
+import { classifyPrereqRule, toText } from "./requirements.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const CACHE = join(ROOT, ".cache", "handbook");
@@ -51,26 +52,8 @@ function sectionBody(html, name) {
   return parts.length ? parts.join(" ") : block;
 }
 
-/**
- * Collapse HTML to readable plain text.
- *
- * Rules lay their alternatives out with <br>, and wrap unit lists in a
- * <div class="auto"> with no surrounding whitespace, so tag boundaries have to
- * become spaces or codes end up glued to the prose around them.
- */
-function toText(html) {
-  if (!html) return "";
-  const spaced = html
-    .replace(/<br\s*\/?>/gi, " ")
-    .replace(/<(p|div|li|dd|dt|tr|td)\b[^>]*>/gi, " $&")
-    .replace(/<\/(p|div|li|dd|dt|tr|td)>/gi, "$& ");
-  return cheerio
-    .load(spaced, null, false)
-    .root()
-    .text()
-    .replace(/\s+/g, " ")
-    .trim();
-}
+// toText lives in requirements.mjs, which needs the same flattening; it is
+// imported above rather than duplicated.
 
 /** Tidy a fragment for embedding in the page: drop target attrs, keep links. */
 function toHtml(html) {
@@ -462,25 +445,66 @@ async function main() {
   const scrapedAt = new Date().toISOString().slice(0, 10);
   const meta = { year, scrapedAt, source: "https://www.handbooks.uwa.edu.au" };
 
+  // Prerequisite rules that name no unit code produce no edge, so the units
+  // they gate would otherwise be drawn as if nothing came before them. The
+  // classifier turns that prose into structured requirements; the catalogue's
+  // own prefixes and school names are what let it tell a subject from an
+  // acronym like ATAR or WAM.
+  const unresolvedSubjects = new Set();
+  const requirementCounts = {};
+  const requirementCtx = {
+    prefixes: new Set([...units.keys()].map((code) => code.slice(0, 4))),
+    schools: new Set([...units.values()].map((u) => u.school).filter(Boolean)),
+    onUnresolved: (text) => unresolvedSubjects.add(text.slice(0, 80)),
+  };
+
   // graph.json is fetched on every page load, so it carries only what the graph
   // draws. Coordinators, locations and long prose stay in details/<PREFIX>.json,
   // which is fetched only when a unit is actually opened.
   const graphUnits = [...units.values()]
     .sort((a, b) => a.code.localeCompare(b.code))
-    .map((u) => ({
-      code: u.code,
-      title: u.title,
-      credits: u.credits,
-      level: u.level,
-      levelOfStudy: u.levelOfStudy,
-      school: u.school,
-      availability: u.availability,
-      rules: u.rules ?? {},
-      prereqUnits: u.prereqUnits ?? [],
-      coreqUnits: u.coreqUnits ?? [],
-      incompatibleUnits: u.incompatibleUnits ?? [],
-      advisableUnits: u.advisableUnits ?? [],
-    }));
+    .map((u) => {
+      const generic = classifyPrereqRule(
+        u.rules?.prerequisites?.html ?? "",
+        requirementCtx,
+      );
+      for (const req of generic) {
+        requirementCounts[req.kind] = (requirementCounts[req.kind] ?? 0) + 1;
+      }
+      const out = {
+        code: u.code,
+        title: u.title,
+        credits: u.credits,
+        level: u.level,
+        levelOfStudy: u.levelOfStudy,
+        school: u.school,
+        availability: u.availability,
+        rules: u.rules ?? {},
+        prereqUnits: u.prereqUnits ?? [],
+        coreqUnits: u.coreqUnits ?? [],
+        incompatibleUnits: u.incompatibleUnits ?? [],
+        advisableUnits: u.advisableUnits ?? [],
+      };
+      // Last key, and omitted when empty: annotate.mjs rewrites this field on
+      // an existing graph.json, and only matching key order keeps the two
+      // producers byte-identical.
+      if (generic.length) out.genericPrereqs = generic;
+      return out;
+    });
+
+  warn(
+    "requirements",
+    Object.entries(requirementCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([kind, n]) => `${kind} ${n}`)
+      .join(", "),
+  );
+  if (unresolvedSubjects.size) {
+    warn(
+      "requirements",
+      `${unresolvedSubjects.size} unrecognised subject phrases, not drawn: ${[...unresolvedSubjects].sort().join(" | ")}`,
+    );
+  }
 
   await writeFile(
     join(OUT, "graph.json"),

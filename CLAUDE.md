@@ -10,6 +10,7 @@ npm run dev              # http://localhost:4321
 npm run build            # static output to dist/ (gitignored)
 npm run preview          # serve the build
 npm run scrape:handbook  # fetch.mjs + parse.mjs; see below before running
+npm run annotate:handbook # re-derive genericPrereqs in graph.json, no network
 ```
 
 No test or lint script. `npm run build` is the only check.
@@ -46,6 +47,27 @@ development), `--refresh` (ignore cache).
 Parsing relies on the handbook's `<!--START x-->` / `<!--END x-->` comment
 markers. If UWA drops them, `report.json` is what will say so.
 
+### Generic prerequisites
+
+1106 of the 2715 prerequisite rules name no unit code at all ("any Level 2 ANTH
+unit", "48 points", "Enrolment in 62510"), so they yield no edge and their units
+would draw as false roots. `scripts/handbook/requirements.mjs` classifies that
+prose into a `genericPrereqs` array on each unit, keyed `unit-set` | `points` |
+`enrolment` | `external` | `other`. It tokenises on the handbook's own `<em>`
+connectives (a closed vocabulary of 14) and on `coursedetails`/`majordetails`/
+`honoursdetails` anchors - **not** on the flattened text.
+
+`parse.mjs` emits the field natively; `annotate.mjs` re-derives it on an
+existing `graph.json` with no network, so the classifier can be changed without
+a re-scrape. Both must produce identical output - run `annotate.mjs` twice and
+compare hashes after touching `requirements.mjs`.
+
+Only `unit-set` is drawn. `uwa-graph.ts` resolves it against **the selected
+major's own units** and funnels them through one shared pseudo-node
+(`id` prefixed `req:`) so the disjunction reads as "any one of these", not "all
+of these". Everything else becomes a detail-panel chip plus a dashed node
+border.
+
 Run the scrape once a year when the handbook rolls over - not casually. It hits
 a university's public site.
 
@@ -62,6 +84,20 @@ a university's public site.
 - **Asset paths must use `import.meta.env.BASE_URL`.** CI overrides `--site` and
   `--base` at build time (`.github/workflows/astro.yml`), so hardcoded absolute
   paths break on Pages.
+- **`public/uwa-units/` is in `.prettierignore`.** The JSON is generated
+  minified; prettier collapses short arrays in a way `JSON.stringify` does not,
+  so a formatted copy and a generated copy can never agree and every
+  regeneration churned the whole file. Formatting also cost ~640KB on a file
+  fetched on every page load.
+- **Requirement pseudo-nodes must not reach `units.get()`.** Their ids start
+  `req:`, so `focusUnit` branches to `focusRequirement` first - otherwise
+  `loadDetail` would fetch `details/req:.json`. Node counts use `cy.nodes("[^type]")`
+  to exclude them.
+- **Shared pseudo-nodes can invent cycles.** Two level 2 units that each ask for
+  "any level 2 unit" would point at each other through their funnels. Guarded by
+  keying the node on its resolved match list *and* a `reachable()` check; funnel
+  edges also carry `kind: "requirement"` so `findCycles` (prereq-only) ignores
+  them.
 - `cytoscape-dagre` ships no types; the shim is `src/types/cytoscape-dagre.d.ts`.
 - Anything from the handbook goes through `esc()` before `innerHTML`, except
   rule HTML, which is inserted verbatim on purpose (the and/or wording is the

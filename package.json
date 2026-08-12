@@ -10,7 +10,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "scrape:handbook": "node scripts/handbook/fetch.mjs && node scripts/handbook/parse.mjs"
+    "scrape:handbook": "node scripts/handbook/fetch.mjs && node scripts/handbook/parse.mjs",
+    "annotate:handbook": "node scripts/handbook/annotate.mjs"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",

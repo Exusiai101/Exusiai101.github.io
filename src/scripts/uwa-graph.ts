@@ -315,11 +315,16 @@ function stylesheet(
     },
     // A unit whose rule gates on something no arrow can carry - a points
     // total, enrolment in a course - is not a starting point, even though
-    // nothing points at it. Must sit after the membership rules to win over
-    // their border colour.
+    // nothing points at it.
+    //
+    // Style only, never colour. Membership owns the border colour and this
+    // owns the border style, because they are independent facts: most units
+    // in an engineering major are compulsory AND gated on enrolment in the
+    // course. Setting the colour here too repainted nearly every node grey
+    // and made compulsory indistinguishable from outside-the-major.
     {
       selector: 'node[generic = "unmet"]',
-      style: { "border-style": "dashed", "border-color": t.muted },
+      style: { "border-style": "dashed" },
     },
     {
       selector: "node:selected",

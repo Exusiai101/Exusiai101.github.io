@@ -74,6 +74,7 @@ const $major = el<HTMLSelectElement>("major");
 const $search = el<HTMLInputElement>("unit-search");
 const $options = el<HTMLDataListElement>("unit-options");
 const $outside = el<HTMLInputElement>("include-outside");
+const $advisable = el<HTMLInputElement>("include-advisable");
 const $overlay = el<HTMLDivElement>("overlay");
 const $provenance = el<HTMLSpanElement>("provenance");
 
@@ -137,24 +138,36 @@ function tokens() {
   };
 }
 
-function stylesheet(t: ReturnType<typeof tokens>): cytoscape.StylesheetJson {
+/**
+ * A phone gets code-only nodes. A title inside the node is what forces it to be
+ * 148px wide, and on a 390px canvas that width is paid twice: once for the node
+ * and again for every node it pushes sideways. Codes alone keep the boxes small
+ * enough that several fit on screen at a zoom where they can still be read, and
+ * the title is one tap away in the detail sheet.
+ */
+function stylesheet(
+  t: ReturnType<typeof tokens>,
+  compact: boolean,
+): cytoscape.StylesheetJson {
   return [
     {
       selector: "node",
       style: {
         shape: "round-rectangle",
         "corner-radius": 6,
-        width: 148,
-        height: 54,
+        width: compact ? 84 : 148,
+        height: compact ? 34 : 54,
         "background-color": t.surface,
         "border-width": 1,
         "border-color": t.line,
-        label: "data(label)",
+        label: compact ? "data(code)" : "data(label)",
         color: t.ink,
-        "font-family": "Geist Variable, sans-serif",
-        "font-size": 11,
+        "font-family": compact
+          ? "Geist Mono Variable, monospace"
+          : "Geist Variable, sans-serif",
+        "font-size": compact ? 10 : 11,
         "text-wrap": "wrap",
-        "text-max-width": "130px",
+        "text-max-width": compact ? "76px" : "130px",
         "text-valign": "center",
         "text-halign": "center",
         "line-height": 1.35,
@@ -208,6 +221,18 @@ function stylesheet(t: ReturnType<typeof tokens>): cytoscape.StylesheetJson {
       selector: 'edge[kind = "coreq"]',
       style: { "line-style": "dashed", "target-arrow-shape": "none" },
     },
+    // Advisable prior study is a recommendation, not a gate, so it is drawn
+    // lighter than the rules that actually block enrolment.
+    {
+      selector: 'edge[kind = "advisable"]',
+      style: {
+        "line-style": "dotted",
+        "target-arrow-shape": "vee",
+        "line-color": t.inkSoft,
+        "target-arrow-color": t.inkSoft,
+        opacity: 0.35,
+      },
+    },
     {
       selector: "edge.highlight",
       style: {
@@ -231,7 +256,6 @@ const majors: Major[] = [];
 const detailCache = new Map<string, Record<string, UnitDetail>>();
 
 let cy: cytoscape.Core | null = null;
-let layout: cytoscape.Layouts | null = null;
 let currentMajor: Major | null = null;
 let membership = new Map<string, Membership>();
 
@@ -258,7 +282,11 @@ function membershipFor(major: Major): Map<string, Membership> {
   return result;
 }
 
-function buildElements(major: Major, includeOutside: boolean) {
+function buildElements(
+  major: Major,
+  includeOutside: boolean,
+  includeAdvisable: boolean,
+) {
   membership = membershipFor(major);
   const visible = new Set(membership.keys());
 
@@ -272,6 +300,7 @@ function buildElements(major: Major, includeOutside: boolean) {
       for (const ref of [
         ...(unit.prereqUnits ?? []),
         ...(unit.coreqUnits ?? []),
+        ...(includeAdvisable ? (unit.advisableUnits ?? []) : []),
       ]) {
         if (!visible.has(ref) && units.has(ref)) visible.add(ref);
       }
@@ -285,6 +314,7 @@ function buildElements(major: Major, includeOutside: boolean) {
     nodes.push({
       data: {
         id: code,
+        code,
         label: `${code}\n${unit.title}`,
         membership: membership.get(code) ?? "outside",
       },
@@ -293,11 +323,21 @@ function buildElements(major: Major, includeOutside: boolean) {
 
   const edges: cytoscape.ElementDefinition[] = [];
   const seen = new Set<string>();
-  const addEdge = (from: string, to: string, kind: "prereq" | "coreq") => {
+  const drawn = new Set<string>();
+  const addEdge = (
+    from: string,
+    to: string,
+    kind: "prereq" | "coreq" | "advisable",
+  ) => {
     if (!visible.has(from) || !visible.has(to) || from === to) return;
     const id = `${kind}:${from}->${to}`;
     if (seen.has(id)) return;
+    // A unit is sometimes both a prerequisite and advisable prior study for the
+    // same target. The binding rule wins; a second faint arrow beside it would
+    // only read as two different relationships.
+    if (drawn.has(`${from}->${to}`)) return;
     seen.add(id);
+    drawn.add(`${from}->${to}`);
     edges.push({ data: { id, source: from, target: to, kind } });
   };
 
@@ -306,6 +346,13 @@ function buildElements(major: Major, includeOutside: boolean) {
     if (!unit) continue;
     for (const ref of unit.prereqUnits ?? []) addEdge(ref, code, "prereq");
     for (const ref of unit.coreqUnits ?? []) addEdge(ref, code, "coreq");
+  }
+  if (includeAdvisable) {
+    for (const code of visible) {
+      const unit = units.get(code);
+      if (!unit) continue;
+      for (const ref of unit.advisableUnits ?? []) addEdge(ref, code, "advisable");
+    }
   }
 
   return { nodes, edges, visible };
@@ -353,13 +400,11 @@ function findCycles(edges: cytoscape.ElementDefinition[]): string[] {
 // ----------------------------------------------------------- graph render
 
 function mount(container: HTMLElement) {
-  layout?.stop();
-  layout = null;
   cy?.destroy();
   cy = cytoscape({
     container,
-    style: stylesheet(tokens()),
-    minZoom: 0.15,
+    style: stylesheet(tokens(), !isDesktop.matches),
+    minZoom: 0.08,
     maxZoom: 2.5,
     boxSelectionEnabled: false,
   });
@@ -380,33 +425,164 @@ function mount(container: HTMLElement) {
   return cy;
 }
 
+/**
+ * dagre lays every disconnected component out in one long row, and most majors
+ * are mostly disconnected: a handful of chains plus a dozen standalone units.
+ * The result is a canvas ten times wider than it is tall, which fits to a zoom
+ * where nothing is readable, worst of all on a phone. So each component is laid
+ * out on its own and the results are packed into a block shaped like the
+ * container. Returns the size of that block so the caller can compare rank
+ * directions.
+ */
+function pack(rankDir: "TB" | "LR", aspect: number) {
+  if (!cy) return { w: 1, h: 1 };
+
+  const boxes = cy
+    .elements()
+    .components()
+    .map((component) => {
+      component
+        .layout({
+          name: "dagre",
+          // @ts-expect-error dagre-specific options are not in the core layout type
+          rankDir,
+          nodeSep: isDesktop.matches ? 26 : 18,
+          rankSep: isDesktop.matches ? 64 : 46,
+          // dagre's minLen must be at least 1; passing 0 for co-requisites (to
+          // keep the pair on one rank) corrupts ranking and throws once a major
+          // has more than a couple of them. Co-requisites are drawn dashed
+          // instead, which carries the same meaning without fighting the layout.
+          animate: false,
+          fit: false,
+        })
+        .run();
+      const bb = component.boundingBox();
+      return { nodes: component.nodes(), x1: bb.x1, y1: bb.y1, w: bb.w, h: bb.h };
+    });
+
+  const gap = isDesktop.matches ? 40 : 28;
+
+  /** Shelf packing, tallest first, into rows no wider than `width`. */
+  const shelve = (
+    group: typeof boxes,
+    width: number,
+    originX: number,
+    originY: number,
+  ) => {
+    let cursorX = 0;
+    let cursorY = 0;
+    let shelfHeight = 0;
+    let used = 0;
+    for (const box of group) {
+      if (cursorX > 0 && cursorX + box.w > width) {
+        cursorX = 0;
+        cursorY += shelfHeight + gap;
+        shelfHeight = 0;
+      }
+      const dx = originX + cursorX - box.x1;
+      const dy = originY + cursorY - box.y1;
+      box.nodes.forEach((node) => {
+        const p = node.position();
+        node.position({ x: p.x + dx, y: p.y + dy });
+      });
+      cursorX += box.w + gap;
+      used = Math.max(used, cursorX - gap);
+      shelfHeight = Math.max(shelfHeight, box.h);
+    }
+    return { w: used, h: cursorY + shelfHeight };
+  };
+
+  boxes.sort((a, b) => b.h * b.w - a.h * a.w);
+  const [main, ...rest] = boxes;
+  if (!rest.length) return { w: main.w, h: main.h };
+
+  // The biggest connected chain sets the shape and everything else fills in
+  // around it: beside the chain while there is room, underneath once there is
+  // not. That is what keeps a mostly-disconnected major - and most of them are
+  // mostly disconnected - from becoming one long row of orphan units.
+  rest.sort((a, b) => b.h - a.h);
+  const area =
+    boxes.reduce((sum, box) => sum + (box.w + gap) * (box.h + gap), 0) * 1.15;
+  const idealHeight = Math.sqrt(area / aspect);
+  const idealWidth = area / idealHeight;
+  const widestRest = rest.reduce((max, box) => Math.max(max, box.w), 0);
+  const beside = idealWidth - main.w - gap;
+
+  shelve([main], main.w, 0, 0);
+  if (beside >= widestRest) {
+    const block = shelve(rest, beside, main.w + gap, 0);
+    return { w: main.w + gap + block.w, h: Math.max(main.h, block.h) };
+  }
+  const block = shelve(rest, Math.max(main.w, widestRest), 0, main.h + gap);
+  return { w: Math.max(main.w, block.w), h: main.h + gap + block.h };
+}
+
+function runLayout() {
+  if (!cy || cy.elements().empty()) return;
+
+  // The canvas is mounted while its section is still hidden, and unhiding an
+  // element fires no resize event, so cytoscape would otherwise pack and fit
+  // against a stale (often zero) viewport.
+  cy.resize();
+
+  const container = cy.container();
+  const aspect =
+    container && container.clientHeight > 0
+      ? container.clientWidth / container.clientHeight
+      : 1.5;
+
+  // Rank direction is the other half of the shape problem. An engineering major
+  // is six ranks deep and forty units wide, so top-to-bottom draws a ribbon that
+  // has to be zoomed out to nothing; the same graph laid left-to-right is much
+  // closer to square. Neither reading is wrong - the arrow still runs from the
+  // prerequisite - so both are tried and whichever ends up readable at a larger
+  // zoom wins, which is the thing the reader actually feels.
+  const readableAt = (box: { w: number; h: number }) =>
+    Math.min(
+      (container?.clientWidth ?? 900) / box.w,
+      (container?.clientHeight ?? 600) / box.h,
+    );
+
+  const vertical = readableAt(pack("TB", aspect));
+  const horizontal = readableAt(pack("LR", aspect));
+  if (vertical >= horizontal) pack("TB", aspect);
+
+  // Work out the resting viewport by moving there, then rewind and animate into
+  // it, so the clamp below can be applied to a real zoom rather than guessed.
+  const from = { zoom: cy.zoom(), pan: { ...cy.pan() } };
+  cy.fit(undefined, isDesktop.matches ? 28 : 16);
+
+  // A whole major fitted to a phone lands somewhere near 0.3, where no label is
+  // readable. Below that floor the graph opens zoomed in at the top instead and
+  // is panned from there; "Fit" is one tap away for the overview.
+  const floor = 0.85;
+  if (!isDesktop.matches && cy.zoom() < floor) {
+    const bounds = cy.elements().boundingBox();
+    cy.zoom(floor);
+    cy.center();
+    const dy = (cy.extent().y1 - bounds.y1 + 16) * cy.zoom();
+    if (dy > 0) cy.panBy({ x: 0, y: dy });
+  }
+
+  if (!reducedMotion.matches) {
+    const to = { zoom: cy.zoom(), pan: { ...cy.pan() } };
+    cy.viewport(from);
+    cy.animate({ zoom: to.zoom, pan: to.pan }, { duration: 240 });
+  }
+}
+
 function render() {
   if (!currentMajor || !cy) return;
 
-  const { nodes, edges } = buildElements(currentMajor, $outside.checked);
+  const { nodes, edges } = buildElements(
+    currentMajor,
+    $outside.checked,
+    $advisable.checked,
+  );
 
-  // Switching majors mid-animation leaves the running layout holding elements
-  // that are about to be removed, which throws inside dagre. Stop it first.
-  layout?.stop();
   cy.elements().remove();
   cy.add([...nodes, ...edges]);
-
-  layout = cy.layout({
-    name: "dagre",
-    // @ts-expect-error dagre-specific options are not in the core layout type
-    rankDir: "TB",
-    nodeSep: 26,
-    rankSep: 64,
-    // dagre's minLen must be at least 1; passing 0 for co-requisites (to keep
-    // the pair on one rank) corrupts ranking and throws once a major has more
-    // than a couple of them. Co-requisites are drawn dashed instead, which
-    // carries the same meaning without fighting the layout.
-    animate: !reducedMotion.matches,
-    animationDuration: 240,
-    fit: true,
-    padding: 28,
-  });
-  layout.run();
+  runLayout();
 
   // Search suggestions follow whatever is on screen.
   $options.innerHTML = nodes
@@ -498,6 +674,15 @@ function focusUnit(code: string) {
     chain.removeClass("dimmed");
     cy.elements().removeClass("highlight");
     node.connectedEdges().addClass("highlight").removeClass("dimmed");
+
+    // Reaching a unit through the search box or through a code inside a rule
+    // can point at a node that is off screen, which looks like nothing happened.
+    const view = cy.extent();
+    const at = node.position();
+    if (at.x < view.x1 || at.x > view.x2 || at.y < view.y1 || at.y > view.y2) {
+      if (reducedMotion.matches) cy.center(node);
+      else cy.animate({ center: { eles: node } }, { duration: 200 });
+    }
   }
 
   const kind = membership.get(code);
@@ -595,6 +780,7 @@ function renderCompact() {
             .map((entry) => {
               const unit = units.get(entry.code);
               const prereq = unit?.prereqUnits ?? [];
+              const advisable = unit?.advisableUnits ?? [];
               return `
                 <li class="rounded-[var(--radius-control)] border border-line bg-canvas p-3">
                   <p class="font-mono text-xs text-ink">${esc(entry.code)}</p>
@@ -604,6 +790,11 @@ function renderCompact() {
                       ? `Needs ${prereq.map(esc).join(", ")}`
                       : "No unit prerequisites listed"
                   }</p>
+                  ${
+                    advisable.length
+                      ? `<p class="mt-1 text-xs text-muted">Advisable first: ${advisable.map(esc).join(", ")}</p>`
+                      : ""
+                  }
                 </li>`;
             })
             .join("");
@@ -635,7 +826,6 @@ function selectMajor(code: string) {
 
   if (major.kind === "disambiguation") {
     currentMajor = null;
-    layout?.stop();
     cy?.elements().remove();
     $workspace.classList.add("hidden");
     $compact.classList.add("hidden");
@@ -669,14 +859,31 @@ function selectMajor(code: string) {
   render();
 }
 
+/**
+ * The full-screen graph borrows the detail panel instead of duplicating it, so
+ * a tap on a node still leads somewhere on a phone.
+ */
+function openOverlay() {
+  $overlay.classList.remove("hidden");
+  $overlay.classList.add("flex");
+  el("overlay-detail").append($detail);
+  mount(el("cy-mobile"));
+  render();
+}
+
+function closeOverlay() {
+  $overlay.classList.add("hidden");
+  $overlay.classList.remove("flex");
+  if ($detail.parentElement !== $workspace) $workspace.append($detail);
+}
+
 /** Desktop gets the canvas, small screens get the list until they ask for the graph. */
 function applyBreakpoint() {
   if (!currentMajor) return;
   if (isDesktop.matches) {
     $workspace.classList.remove("hidden");
     $compact.classList.add("hidden");
-    $overlay.classList.add("hidden");
-    $overlay.classList.remove("flex");
+    closeOverlay();
     if (!cy || cy.container() !== el("cy")) mount(el("cy"));
   } else {
     $workspace.classList.add("hidden");
@@ -736,6 +943,7 @@ async function main() {
   // Events
   $major.addEventListener("change", () => selectMajor($major.value));
   $outside.addEventListener("change", () => render());
+  $advisable.addEventListener("change", () => render());
 
   $search.addEventListener("change", () => {
     const code = $search.value.trim().toUpperCase();
@@ -746,16 +954,17 @@ async function main() {
     cy?.fit(undefined, 28);
   });
 
-  el<HTMLButtonElement>("open-graph").addEventListener("click", () => {
-    $overlay.classList.remove("hidden");
-    $overlay.classList.add("flex");
-    mount(el("cy-mobile"));
-    render();
+  el<HTMLButtonElement>("fit-mobile").addEventListener("click", () => {
+    cy?.fit(undefined, 20);
   });
 
-  el<HTMLButtonElement>("close-graph").addEventListener("click", () => {
-    $overlay.classList.add("hidden");
-    $overlay.classList.remove("flex");
+  el<HTMLButtonElement>("open-graph").addEventListener("click", openOverlay);
+  el<HTMLButtonElement>("close-graph").addEventListener("click", closeOverlay);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !$overlay.classList.contains("hidden")) {
+      closeOverlay();
+    }
   });
 
   isDesktop.addEventListener("change", () => {
@@ -767,7 +976,9 @@ async function main() {
   window
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", () => {
-      requestAnimationFrame(() => cy?.style(stylesheet(tokens())));
+      requestAnimationFrame(() =>
+        cy?.style(stylesheet(tokens(), !isDesktop.matches)),
+      );
     });
 }
 

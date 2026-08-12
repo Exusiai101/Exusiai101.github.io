@@ -41,9 +41,10 @@ const base = import.meta.env.BASE_URL;
         <p class="mt-2 border-l border-line pl-4 text-sm leading-relaxed text-ink-soft">
           Prerequisite rules are written as sentences, and many of them mix "and" with
           "or" in ways a diagram cannot honestly capture. An arrow here means only that a
-          unit is named somewhere in another unit's prerequisite rule. Select any unit to
-          read the rule exactly as the handbook words it, and treat the handbook as
-          authoritative.
+          unit is named somewhere in another unit's prerequisite rule. Dotted arrows are
+          advisable prior study, which the handbook recommends but does not enforce: you
+          can enrol without them. Select any unit to read the rule exactly as the handbook
+          words it, and treat the handbook as authoritative.
         </p>
       </details>
     </header>
@@ -54,7 +55,7 @@ const base = import.meta.env.BASE_URL;
       style="--index:1"
       aria-label="Graph controls"
     >
-      <div class="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,2fr)_auto] md:items-end">
+      <div class="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,2fr)] md:items-end">
         <div>
           <label for="major" class="meta mb-1.5 block text-ink-soft">Major</label>
           <select
@@ -80,12 +81,21 @@ const base = import.meta.env.BASE_URL;
           <datalist id="unit-options"></datalist>
         </div>
 
-        <label
-          class="flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-2 text-sm text-ink-soft md:justify-self-start"
-        >
-          <input id="include-outside" type="checkbox" checked class="accent-accent" />
-          Include prerequisites outside the major
-        </label>
+        <div class="grid gap-2 sm:grid-cols-2 md:col-span-2">
+          <label
+            class="flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-2 text-sm text-ink-soft"
+          >
+            <input id="include-outside" type="checkbox" checked class="accent-accent" />
+            Include prerequisites outside the major
+          </label>
+
+          <label
+            class="flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-control)] border border-line bg-canvas px-3 py-2 text-sm text-ink-soft"
+          >
+            <input id="include-advisable" type="checkbox" checked class="accent-accent" />
+            Show advisable prior study
+          </label>
+        </div>
       </div>
 
       <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-4">
@@ -98,7 +108,9 @@ const base = import.meta.env.BASE_URL;
         <span class="tag" style="background:var(--surface-tint);color:var(--muted)">
           Outside the major
         </span>
-        <span class="meta">Solid arrow: prerequisite. Dashed: co-requisite.</span>
+        <span class="meta">
+          Solid arrow: prerequisite. Dashed: co-requisite. Dotted: advisable prior study.
+        </span>
       </div>
     </section>
 
@@ -154,15 +166,34 @@ const base = import.meta.env.BASE_URL;
     >
       <div class="flex items-center justify-between border-b border-line px-4 py-3">
         <span class="meta" id="overlay-title">Prerequisite graph</span>
-        <button
-          id="close-graph"
-          type="button"
-          class="rounded-[var(--radius-control)] border border-line px-3 py-1.5 text-xs text-ink"
-        >
-          Close
-        </button>
+        <div class="flex items-center gap-2">
+          <button
+            id="fit-mobile"
+            type="button"
+            class="rounded-[var(--radius-control)] border border-line px-3 py-1.5 text-xs text-ink-soft"
+          >
+            Fit
+          </button>
+          <button
+            id="close-graph"
+            type="button"
+            class="rounded-[var(--radius-control)] border border-line px-3 py-1.5 text-xs text-ink"
+          >
+            Close
+          </button>
+        </div>
       </div>
       <div id="cy-mobile" class="min-h-0 flex-1"></div>
+      <!--
+        Tapping a node has to lead somewhere. The desktop detail panel is moved
+        in here as a sheet while the overlay is open rather than duplicated, so
+        both views render from the same markup.
+      -->
+      <div
+        id="overlay-detail"
+        class="max-h-[42vh] shrink-0 overflow-y-auto border-t border-line bg-surface"
+      >
+      </div>
     </div>
 
     <footer class="reveal mt-12 border-t border-line pt-6" style="--index:2">

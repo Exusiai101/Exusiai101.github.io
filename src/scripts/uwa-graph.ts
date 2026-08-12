@@ -1272,7 +1272,7 @@ function renderCompact() {
               const prereq = unit?.prereqUnits ?? [];
               const advisable = unit?.advisableUnits ?? [];
               return `
-                <li class="rounded-[var(--radius-control)] border border-line bg-canvas p-3">
+                <li data-unit-row="${esc(entry.code)}" class="rounded-[var(--radius-control)] border border-line bg-canvas p-3 transition-colors lg:cursor-pointer lg:hover:border-muted">
                   <p class="font-mono text-xs text-ink">${esc(entry.code)}</p>
                   <p class="mt-0.5 text-sm text-ink">${esc(unit?.title ?? "")}</p>
                   <p class="mt-1.5 text-xs text-ink-soft">${
@@ -1306,13 +1306,17 @@ function renderCompact() {
 
           return `<div class="mt-4">
               <div class="flex flex-wrap items-center gap-2">${badge}<span class="meta">${esc(group.take)}</span></div>
-              <ul class="mt-2 grid gap-2 sm:grid-cols-2">${rows}</ul>
+              <ul class="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">${rows}</ul>
             </div>`;
         })
         .join("");
 
+      // The heading sticks because the tail of this data is long: most majors
+      // are ~15 units, but Medical Science is 81 across 35 groups, and without
+      // it you lose track of which level you are reading. Needs the section's
+      // own background, or rows scroll through it.
       return `<section class="rounded-[var(--radius-card)] border border-line bg-surface p-4">
-          <h2 class="display text-lg">${esc(level.level)}</h2>${groups}
+          <h2 class="display sticky top-0 z-10 -mx-4 -mt-4 rounded-t-[var(--radius-card)] bg-surface px-4 pt-4 pb-2 text-lg">${esc(level.level)}</h2>${groups}
         </section>`;
     })
     .join("");
@@ -1383,17 +1387,21 @@ function closeOverlay() {
   if ($detail.parentElement !== $workspace) $workspace.append($detail);
 }
 
-/** Desktop gets the canvas, small screens get the list until they ask for the graph. */
+/**
+ * The list carries the level split, core vs option and the points each group
+ * asks for, none of which the graph encodes, so it stays on at every width:
+ * the only view below lg, reference material under the canvas above it. Only
+ * the graph swaps in and out.
+ */
 function applyBreakpoint() {
   if (!currentMajor) return;
+  $compact.classList.remove("hidden");
   if (isDesktop.matches) {
     $workspace.classList.remove("hidden");
-    $compact.classList.add("hidden");
     closeOverlay();
     if (!cy || cy.container() !== el("cy")) mount(el("cy"));
   } else {
     $workspace.classList.add("hidden");
-    $compact.classList.remove("hidden");
   }
 }
 
@@ -1471,6 +1479,29 @@ async function main() {
 
   el<HTMLButtonElement>("fit-mobile").addEventListener("click", () => {
     cy?.fit(undefined, 20);
+  });
+
+  // A row selects its unit in the graph, which is what stops the list from
+  // being a second copy of the same data. Delegated, because renderCompact()
+  // replaces every row on each render. Desktop only: below lg the graph is not
+  // on screen to receive the selection, and the card already shows everything
+  // the jump would reveal. Not a tab stop by design - Medical Science alone
+  // would add 81 of them ahead of the footer, and the search box above is the
+  // keyboard path to the same thing.
+  $compactList.addEventListener("click", (event) => {
+    if (!isDesktop.matches) return;
+    const row = (event.target as HTMLElement).closest<HTMLElement>(
+      "[data-unit-row]",
+    );
+    const code = row?.dataset.unitRow;
+    if (!code || !units.has(code)) return;
+    focusUnit(code);
+    // The list sits below the fold, so without this the click lands on a graph
+    // the reader cannot see and reads as nothing happening.
+    $workspace.scrollIntoView({
+      behavior: reducedMotion.matches ? "auto" : "smooth",
+      block: "start",
+    });
   });
 
   el<HTMLButtonElement>("open-graph").addEventListener("click", openOverlay);

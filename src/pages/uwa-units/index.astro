@@ -190,14 +190,26 @@ const github = links.find((link) => link.label === 'GitHub');
     </section>
 
     <!--
-      Under lg the canvas is unusable, so the same data renders as a list grouped
-      by level with prerequisites inline. The graph stays reachable full screen.
+      The same data as a list grouped by level, with prerequisites inline. It
+      carries what the graph structurally cannot: the level split, core vs
+      option, and how many points each group asks for. Below lg it is the only
+      view, because the canvas is unusable at that width and the graph moves
+      behind a full-screen button; at lg and up it stays on as reference under
+      the graph, and its rows select into it.
     -->
     <section id="compact" class="mt-6 hidden">
+      <div
+        class="mb-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-line pt-6"
+      >
+        <h2 class="display text-2xl">The full plan, by level</h2>
+        <!-- Only true where the graph is on screen to receive the selection. -->
+        <p class="meta hidden lg:block">Select a unit to show it in the graph above.</p>
+      </div>
+
       <button
         id="open-graph"
         type="button"
-        class="mb-5 flex w-full items-center justify-center gap-2 rounded-[var(--radius-control)] border border-line bg-surface px-4 py-2.5 text-sm text-ink transition-colors hover:bg-surface-tint"
+        class="mb-5 flex w-full items-center justify-center gap-2 rounded-[var(--radius-control)] border border-line bg-surface px-4 py-2.5 text-sm text-ink transition-colors hover:bg-surface-tint lg:hidden"
       >
         <Icon name="ph:graph-bold" class="h-4 w-4" />
         Open the graph full screen

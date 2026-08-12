@@ -104,7 +104,7 @@ export const links = [
   {
     label: "Email",
     handle: "scoutwu@outlook.com",
-    href: "scoutwu@outlook.com",
+    href: "mailto:scoutwu@outlook.com",
     icon: "ph:envelope-simple-bold",
   },
   {
